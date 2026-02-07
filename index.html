@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORE SYSTEM / SANS-SERIF EDITION</title>
+    <title>Личный редактор</title>
     <!-- Подключаем мягкий и скругленный шрифт Ubuntu -->
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- Chart.js для графиков -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- html2canvas для создания PNG -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- jsPDF для создания PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --bg: #1a1c1e;
@@ -22,6 +25,7 @@
             --green: #81c784;
             --blue: #64b5f6;
             --purple: #ba68c8;
+            --orange: #ffb74d;
             --radius: 14px;
             --transition: all 0.25s ease;
         }
@@ -51,6 +55,7 @@
             gap: 40px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             z-index: 100;
+            flex-shrink: 0;
         }
 
         .nav-item {
@@ -62,6 +67,7 @@
             font-size: 0.9rem;
             position: relative;
             transition: var(--transition);
+            white-space: nowrap;
         }
 
         .nav-item.active { color: #fff; }
@@ -77,7 +83,12 @@
         }
 
         /* WRAPPER */
-        #main-wrapper { display: flex; flex-grow: 1; overflow: hidden; }
+        #main-wrapper { 
+            display: flex; 
+            flex-grow: 1; 
+            overflow: hidden;
+            min-height: 0;
+        }
 
         /* SIDEBAR */
         #sidebar {
@@ -88,6 +99,7 @@
             padding: 30px;
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
         .btn-action {
@@ -119,7 +131,12 @@
         .user-tab.active { border-color: var(--accent); background: rgba(255,255,255,0.08); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
         /* CONTENT */
-        #protocol-content { flex-grow: 1; padding: 60px; overflow-y: auto; }
+        #protocol-content { 
+            flex-grow: 1; 
+            padding: 60px; 
+            overflow-y: auto;
+            min-height: 0;
+        }
         .card { 
             background: var(--surface); 
             padding: 45px; 
@@ -156,8 +173,24 @@
         input[type="text"]:focus { border-color: var(--accent); background: #141618; }
 
         /* EDITOR */
-        #editor-view { display: none; width: 100%; height: 100%; padding: 30px; gap: 30px; animation: fadeIn 0.4s ease; }
-        .editor-container { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        #editor-view { 
+            display: none; 
+            width: 100%; 
+            height: 100%; 
+            padding: 30px; 
+            gap: 30px; 
+            animation: fadeIn 0.4s ease;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        .editor-container { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;
+            min-height: 0;
+        }
         textarea {
             flex-grow: 1;
             background: #141618;
@@ -166,46 +199,65 @@
             padding: 25px;
             color: #b5cea8;
             font-family: 'JetBrains Mono', monospace;
-            resize: none; outline: none; font-size: 0.95rem;
+            resize: none; 
+            outline: none; 
+            font-size: 0.95rem;
+            min-height: 200px;
         }
-        iframe { flex: 1; border-radius: var(--radius); border: none; background: white; }
+        iframe { 
+            flex: 1; 
+            border-radius: var(--radius); 
+            border: none; 
+            background: white;
+            min-height: 200px;
+        }
 
         /* GRAPH VIEW */
         #graph-view {
             display: none;
             width: 100%;
             height: 100%;
-            padding: 30px;
-            gap: 30px;
+            padding: 20px;
+            gap: 20px;
             animation: fadeIn 0.4s ease;
             flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
         }
 
-        .graph-controls {
+        .graph-header {
             display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
             background: var(--surface);
-            padding: 25px;
+            padding: 20px;
             border-radius: var(--radius);
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
 
-        .control-group {
+        .graph-type-selector {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex: 1;
-            min-width: 200px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .color-picker {
-            width: 40px;
-            height: 40px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
+        .graph-type-btn {
+            padding: 8px 16px;
             background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .graph-type-btn.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
         }
 
         .graph-container {
@@ -214,20 +266,131 @@
             flex-direction: column;
             background: var(--surface);
             border-radius: var(--radius);
-            padding: 25px;
-            position: relative;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+            min-height: 0;
         }
 
-        .chart-wrapper {
+        .chart-area-wrapper {
             flex: 1;
             position: relative;
             background: rgba(255,255,255,0.02);
             border-radius: var(--radius);
             padding: 20px;
-            margin-bottom: 20px;
+            overflow: auto;
+            min-height: 300px;
         }
 
-        .btn-del { color: #555; background: none; border: none; cursor: pointer; font-size: 1.4rem; line-height: 1; }
+        .chart-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .dataset-selector {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dataset-tab {
+            padding: 8px 16px;
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-dim);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .dataset-tab.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .dataset-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .dataset-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .dataset-editor {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-top: 10px;
+            flex-shrink: 0;
+        }
+
+        .point-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+            overflow-y: auto;
+            max-height: 200px;
+            padding: 5px;
+        }
+
+        .point-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .point-value {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            outline: none;
+        }
+
+        .point-value:focus {
+            border-color: var(--accent);
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-del { 
+            color: #555; 
+            background: none; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 1.4rem; 
+            line-height: 1; 
+        }
         .btn-del:hover { color: var(--red); }
 
         #gen-trigger {
@@ -240,6 +403,7 @@
             padding: 20px 40px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.4);
             font-size: 1rem;
+            z-index: 1000;
         }
 
         .output-box {
@@ -254,97 +418,188 @@
             animation: fadeIn 0.3s ease;
         }
 
-        select {
-            background: var(--bg);
-            color: var(--text);
-            border: 2px solid rgba(255,255,255,0.05);
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-family: 'Ubuntu', sans-serif;
-            outline: none;
-            transition: var(--transition);
-        }
-
-        select:focus {
-            border-color: var(--accent);
-        }
-
-        .data-points {
-            display: flex;
+        /* TABLE VIEW */
+        #table-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            gap: 20px;
+            animation: fadeIn 0.4s ease;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 10px;
+            overflow: hidden;
+            min-height: 0;
         }
 
-        .point-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .point-input {
-            flex: 1;
-            background: var(--bg);
-            border: 2px solid rgba(255,255,255,0.05);
-            color: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            outline: none;
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            background: var(--bg);
-            color: var(--text);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-small:hover {
-            background: var(--surface);
-            border-color: var(--accent);
-        }
-
-        .dataset-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .dataset-item {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: var(--radius);
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .dataset-header {
+        .table-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--surface);
+            padding: 20px;
+            border-radius: var(--radius);
             margin-bottom: 10px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .chart-title-input {
+        .table-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .table-wrapper {
+            flex: 1;
+            background: rgba(255,255,255,0.02);
+            border-radius: var(--radius);
+            padding: 20px;
+            overflow: auto;
+            min-height: 300px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .data-table th {
+            background: var(--panel);
+            color: var(--text);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text);
+        }
+
+        .data-table tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .data-table input {
+            width: 100%;
             background: transparent;
             border: none;
             color: var(--text);
-            font-size: 1.2rem;
-            font-weight: bold;
-            padding: 5px;
-            width: 100%;
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding: 8px;
+            outline: none;
+            font-family: 'Ubuntu', sans-serif;
         }
 
-        .chart-title-input:focus {
+        .data-table input:focus {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .table-btn {
+            padding: 10px 20px;
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .table-btn:hover {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .table-btn.red {
+            background: var(--red);
+            color: white;
+            border-color: var(--red);
+        }
+
+        .table-btn.green {
+            background: var(--green);
+            color: white;
+            border-color: var(--green);
+        }
+
+        .table-btn.blue {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+        }
+
+        .cell-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .cell-btn {
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            border-radius: 4px;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .cell-btn:hover {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .export-options {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .table-title {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .table-title-input {
+            width: 100%;
+            background: var(--bg);
+            border: 2px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
             outline: none;
-            border-bottom-color: var(--accent);
+        }
+
+        .table-title-input:focus {
+            border-color: var(--accent);
         }
     </style>
 </head>
@@ -354,6 +609,7 @@
     <div class="nav-item active" id="nav-prot" onclick="switchMode('protocol')">1. Протокол</div>
     <div class="nav-item" id="nav-edit" onclick="switchMode('editor')">2. Редактор</div>
     <div class="nav-item" id="nav-graph" onclick="switchMode('graph')">3. График</div>
+    <div class="nav-item" id="nav-table" onclick="switchMode('table')">4. Таблица</div>
 </nav>
 
 <div id="main-wrapper">
@@ -403,57 +659,87 @@
     </div>
 
     <div id="graph-view">
-        <div class="graph-controls">
-            <div class="control-group">
-                <label>Тип графика</label>
-                <select id="chart-type" onchange="updateChart()">
-                    <option value="line">Линейный</option>
-                    <option value="bar">Столбчатый</option>
-                    <option value="radar">Радар</option>
-                    <option value="pie">Круговая диаграмма</option>
-                    <option value="doughnut">Кольцевая</option>
-                </select>
+        <div class="graph-header">
+            <div class="graph-type-selector">
+                <button class="graph-type-btn active" onclick="setChartType('line')">Линия</button>
+                <button class="graph-type-btn" onclick="setChartType('bar')">Столбцы</button>
+                <button class="graph-type-btn" onclick="setChartType('radar')">Радар</button>
+                <button class="graph-type-btn" onclick="setChartType('pie')">Круг</button>
             </div>
-            <div class="control-group">
-                <label>Название графика</label>
-                <input type="text" id="chart-title" value="Мой график" oninput="updateChart()" class="point-input">
-            </div>
-            <div class="control-group">
-                <label>Цвет фона</label>
-                <input type="color" id="bg-color" value="#24272b" class="color-picker" onchange="updateChart()">
+            
+            <div class="chart-actions">
+                <button class="btn-action" onclick="addDataset()">+ Набор</button>
+                <button class="btn-action" onclick="downloadChart()" style="background: var(--green);">↓ PNG</button>
+                <button class="btn-action" onclick="resetChart()" style="background: var(--red);">Сброс</button>
             </div>
         </div>
 
         <div class="graph-container">
-            <input type="text" id="chart-custom-title" value="Анализ данных" class="chart-title-input" oninput="updateChart()">
-            
-            <div class="chart-wrapper">
+            <div class="dataset-selector" id="dataset-tabs">
+                <!-- Вкладки наборов будут здесь -->
+            </div>
+
+            <div class="chart-area-wrapper">
                 <canvas id="myChart"></canvas>
             </div>
 
-            <div class="dataset-controls">
-                <button class="btn-action" onclick="addDataset()">+ Добавить набор данных</button>
-                <button class="btn-action" onclick="downloadChart()" style="background: var(--green);">↓ Скачать PNG</button>
-                <button class="btn-action" onclick="resetChart()" style="background: var(--red);">Сбросить</button>
+            <div id="dataset-editor-container">
+                <!-- Редактор текущего набора будет здесь -->
+            </div>
+        </div>
+    </div>
+
+    <div id="table-view">
+        <div class="table-header">
+            <div class="table-title">
+                <input type="text" id="table-title" value="Моя таблица" class="table-title-input" oninput="updateTableTitle()">
+            </div>
+            
+            <div class="export-options">
+                <button class="table-btn green" onclick="addRow()">+ Строка</button>
+                <button class="table-btn blue" onclick="addColumn()">+ Столбец</button>
+                <button class="table-btn" onclick="exportTablePNG()">📷 PNG</button>
+                <button class="table-btn" onclick="exportTablePDF()">📄 PDF</button>
+                <button class="table-btn red" onclick="clearTable()">Очистить</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table class="data-table" id="data-table">
+                    <thead>
+                        <tr id="table-header">
+                            <th style="min-width: 50px;">#</th>
+                            <th contenteditable="true" onblur="updateColumnName(0, this.textContent)">Колонка 1</th>
+                            <th contenteditable="true" onblur="updateColumnName(1, this.textContent)">Колонка 2</th>
+                            <th contenteditable="true" onblur="updateColumnName(2, this.textContent)">Колонка 3</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr>
+                            <td style="font-weight: bold; background: rgba(255,255,255,0.02);">1</td>
+                            <td><input type="text" value="Данные 1" oninput="updateCell(0,0,this.value)"></td>
+                            <td><input type="text" value="Данные 2" oninput="updateCell(0,1,this.value)"></td>
+                            <td><input type="text" value="Данные 3" oninput="updateCell(0,2,this.value)"></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold; background: rgba(255,255,255,0.02);">2</td>
+                            <td><input type="text" value="Данные 4" oninput="updateCell(1,0,this.value)"></td>
+                            <td><input type="text" value="Данные 5" oninput="updateCell(1,1,this.value)"></td>
+                            <td><input type="text" value="Данные 6" oninput="updateCell(1,2,this.value)"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <div id="datasets-container">
-                <div class="dataset-item">
-                    <div class="dataset-header">
-                        <h3 style="margin: 0;">Набор данных 1</h3>
-                        <button class="btn-del" onclick="removeDataset(0)">×</button>
-                    </div>
-                    <label>Название набора</label>
-                    <input type="text" class="dataset-name" value="Данные 1" oninput="updateChart()" style="margin-bottom: 10px;">
-                    
-                    <label>Цвет графика</label>
-                    <input type="color" class="dataset-color" value="#8e99a2" onchange="updateChart()" style="margin-bottom: 10px;">
-                    
-                    <label>Точки данных (через запятую)</label>
-                    <input type="text" class="dataset-points" value="10,20,30,40,50" oninput="updateChart()" placeholder="Пример: 10,20,30,40,50">
-                    
-                    <label style="margin-top: 10px;">Метки (через запятую)</label>
-                    <input type="text" class="dataset-labels" value="Янв,Фев,Мар,Апр,Май" oninput="updateChart()" placeholder="Пример: Янв,Фев,Мар">
+            <div class="table-controls">
+                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    <button class="cell-btn" onclick="sortTable(0, 'asc')">↑ По колонке 1</button>
+                    <button class="cell-btn" onclick="sortTable(1, 'asc')">↑ По колонке 2</button>
+                    <button class="cell-btn" onclick="sortTable(2, 'asc')">↑ По колонке 3</button>
+                </div>
+                <div style="margin-left: auto; color: var(--text-dim); font-size: 0.9rem;">
+                    Всего строк: <span id="row-count">2</span>, столбцов: <span id="col-count">3</span>
                 </div>
             </div>
         </div>
@@ -461,42 +747,65 @@
 </div>
 
 <script>
+    // Инициализация jsPDF
+    const { jsPDF } = window.jspdf;
+    
     let users = JSON.parse(localStorage.getItem('soft_db_v4')) || [];
     let cur = null;
     let chart = null;
-    let chartData = JSON.parse(localStorage.getItem('chart_data')) || {
-        datasets: [{
-            label: 'Данные 1',
-            data: [10, 20, 30, 40, 50],
-            backgroundColor: 'rgba(142, 153, 162, 0.2)',
-            borderColor: 'rgba(142, 153, 162, 1)',
-            borderWidth: 2,
-            fill: true
-        }],
-        labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май']
+    let currentChartType = 'line';
+    let currentDatasetIndex = 0;
+    
+    // Данные для графика
+    let chartData = JSON.parse(localStorage.getItem('chart_data_v2')) || {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '00:00'],
+        datasets: [
+            {
+                id: 1,
+                name: 'Данные 1',
+                color: '#8e99a2',
+                values: [10.5, 22.3, 35.7, 42.1, 38.4, 25.9, 12.7],
+                visible: true
+            }
+        ]
+    };
+
+    // Данные для таблицы
+    let tableData = JSON.parse(localStorage.getItem('table_data')) || {
+        title: "Моя таблица",
+        columns: ["Колонка 1", "Колонка 2", "Колонка 3"],
+        rows: [
+            ["Данные 1", "Данные 2", "Данные 3"],
+            ["Данные 4", "Данные 5", "Данные 6"]
+        ]
     };
 
     function switchMode(mode) {
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        
+        // Скрыть все представления
+        document.getElementById('protocol-view').style.display = 'none';
+        document.getElementById('editor-view').style.display = 'none';
+        document.getElementById('graph-view').style.display = 'none';
+        document.getElementById('table-view').style.display = 'none';
+        document.getElementById('gen-trigger').style.display = 'none';
+        
+        // Показать нужное представление
         if(mode === 'protocol') {
             document.getElementById('nav-prot').classList.add('active');
             document.getElementById('protocol-view').style.display = 'flex';
-            document.getElementById('editor-view').style.display = 'none';
-            document.getElementById('graph-view').style.display = 'none';
             document.getElementById('gen-trigger').style.display = 'block';
         } else if(mode === 'editor') {
             document.getElementById('nav-edit').classList.add('active');
-            document.getElementById('protocol-view').style.display = 'none';
             document.getElementById('editor-view').style.display = 'flex';
-            document.getElementById('graph-view').style.display = 'none';
-            document.getElementById('gen-trigger').style.display = 'none';
         } else if(mode === 'graph') {
             document.getElementById('nav-graph').classList.add('active');
-            document.getElementById('protocol-view').style.display = 'none';
-            document.getElementById('editor-view').style.display = 'none';
             document.getElementById('graph-view').style.display = 'flex';
-            document.getElementById('gen-trigger').style.display = 'none';
-            setTimeout(initChart, 100);
+            setTimeout(initChart, 50);
+        } else if(mode === 'table') {
+            document.getElementById('nav-table').classList.add('active');
+            document.getElementById('table-view').style.display = 'flex';
+            renderTable();
         }
     }
 
@@ -580,125 +889,109 @@
     function initChart() {
         const ctx = document.getElementById('myChart').getContext('2d');
         
-        // Удаляем предыдущий график если есть
         if (chart) {
             chart.destroy();
         }
         
-        const chartType = document.getElementById('chart-type').value;
-        const bgColor = document.getElementById('bg-color').value;
-        const chartTitle = document.getElementById('chart-custom-title').value;
+        renderDatasetTabs();
         
-        // Обновляем данные из UI
-        updateChartDataFromUI();
+        const visibleDatasets = chartData.datasets.filter(ds => ds.visible);
         
         chart = new Chart(ctx, {
-            type: chartType,
+            type: currentChartType,
             data: {
                 labels: chartData.labels,
-                datasets: chartData.datasets.map(dataset => ({
-                    ...dataset,
-                    pointBackgroundColor: dataset.borderColor,
-                    pointBorderColor: '#fff',
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }))
+                datasets: visibleDatasets.map(dataset => {
+                    const rgb = hexToRgb(dataset.color);
+                    return {
+                        label: dataset.name,
+                        data: dataset.values,
+                        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${currentChartType === 'line' ? '0.1' : '0.6'})`,
+                        borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)`,
+                        borderWidth: currentChartType === 'line' ? 2 : 1,
+                        fill: currentChartType === 'line',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.3
+                    };
+                })
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
                 plugins: {
                     legend: {
-                        position: 'top',
-                        labels: {
-                            color: '#e1e1e1',
-                            font: {
-                                family: 'Ubuntu',
-                                size: 14
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: chartTitle,
-                        color: '#e1e1e1',
-                        font: {
-                            family: 'Ubuntu',
-                            size: 18,
-                            weight: 'bold'
-                        }
+                        display: false
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(30, 33, 36, 0.9)',
+                        backgroundColor: 'rgba(30, 33, 36, 0.95)',
                         titleColor: '#e1e1e1',
                         bodyColor: '#e1e1e1',
                         borderColor: 'rgba(142, 153, 162, 0.5)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
+                            }
+                        }
                     }
                 },
-                scales: chartType !== 'pie' && chartType !== 'doughnut' && chartType !== 'radar' ? {
+                scales: currentChartType !== 'pie' && currentChartType !== 'radar' ? {
                     x: {
                         grid: {
-                            color: 'rgba(255,255,255,0.1)'
+                            color: 'rgba(255,255,255,0.05)',
+                            drawTicks: false
                         },
                         ticks: {
-                            color: '#9ba1a6'
+                            color: '#9ba1a6',
+                            font: {
+                                size: 11
+                            }
                         }
                     },
                     y: {
+                        beginAtZero: true,
                         grid: {
-                            color: 'rgba(255,255,255,0.1)'
+                            color: 'rgba(255,255,255,0.05)',
+                            drawTicks: false
                         },
                         ticks: {
-                            color: '#9ba1a6'
-                        },
-                        beginAtZero: true
+                            color: '#9ba1a6',
+                            font: {
+                                size: 11
+                            },
+                            precision: 2,
+                            stepSize: getStepSize()
+                        }
                     }
                 } : {},
-                backgroundColor: bgColor
+                animation: {
+                    duration: 300
+                }
             }
         });
         
-        // Сохраняем данные в localStorage
+        renderDatasetEditor();
         saveChartData();
     }
 
-    function updateChartDataFromUI() {
-        const datasets = [];
-        const labelsInput = document.querySelector('.dataset-labels');
+    function getStepSize() {
+        const allValues = chartData.datasets.flatMap(ds => ds.values);
+        const max = Math.max(...allValues);
+        const min = Math.min(...allValues);
+        const range = max - min;
         
-        // Собираем все наборы данных
-        document.querySelectorAll('.dataset-item').forEach((item, index) => {
-            const name = item.querySelector('.dataset-name').value;
-            const color = item.querySelector('.dataset-color').value;
-            const points = item.querySelector('.dataset-points').value
-                .split(',')
-                .map(p => parseFloat(p.trim()))
-                .filter(p => !isNaN(p));
-            
-            const rgbColor = hexToRgb(color);
-            
-            datasets.push({
-                label: name,
-                data: points,
-                backgroundColor: `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.2)`,
-                borderColor: `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 1)`,
-                borderWidth: 2,
-                fill: true
-            });
-            
-            // Берем метки из первого набора
-            if (index === 0 && labelsInput) {
-                chartData.labels = labelsInput.value.split(',').map(l => l.trim());
-            }
-        });
-        
-        chartData.datasets = datasets;
-    }
-
-    function updateChart() {
-        updateChartDataFromUI();
-        initChart();
+        if (range < 1) return 0.1;
+        if (range < 5) return 0.5;
+        if (range < 20) return 1;
+        if (range < 50) return 5;
+        if (range < 100) return 10;
+        return Math.ceil(range / 20);
     }
 
     function hexToRgb(hex) {
@@ -710,56 +1003,156 @@
         } : { r: 142, g: 153, b: 162 };
     }
 
-    function addDataset() {
-        const colors = ['#8e99a2', '#81c784', '#64b5f6', '#ba68c8', '#ffb74d', '#4db6ac'];
-        const colorIndex = document.querySelectorAll('.dataset-item').length % colors.length;
+    function setChartType(type) {
+        currentChartType = type;
+        document.querySelectorAll('.graph-type-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        initChart();
+    }
+
+    function renderDatasetTabs() {
+        const tabsContainer = document.getElementById('dataset-tabs');
+        tabsContainer.innerHTML = chartData.datasets.map((dataset, index) => `
+            <div class="dataset-tab ${index === currentDatasetIndex ? 'active' : ''}" 
+                 onclick="selectDataset(${index})">
+                <span class="dataset-color" style="background: ${dataset.color}"></span>
+                ${dataset.name}
+                ${!dataset.visible ? '<span style="opacity: 0.5;"> (скрыт)</span>' : ''}
+            </div>
+        `).join('');
+    }
+
+    function selectDataset(index) {
+        currentDatasetIndex = index;
+        renderDatasetTabs();
+        renderDatasetEditor();
+    }
+
+    function renderDatasetEditor() {
+        const dataset = chartData.datasets[currentDatasetIndex];
+        const container = document.getElementById('dataset-editor-container');
         
-        const datasetHTML = `
-            <div class="dataset-item">
-                <div class="dataset-header">
-                    <h3 style="margin: 0;">Набор данных ${document.querySelectorAll('.dataset-item').length + 1}</h3>
-                    <button class="btn-del" onclick="removeDataset(${document.querySelectorAll('.dataset-item').length})">×</button>
+        container.innerHTML = `
+            <div class="dataset-editor">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <input type="text" 
+                               value="${dataset.name}" 
+                               oninput="updateDatasetName(${currentDatasetIndex}, this.value)"
+                               style="background: var(--surface); border: 1px solid rgba(255,255,255,0.1); color: var(--text); padding: 8px 12px; border-radius: 6px; width: 200px;">
+                        
+                        <input type="color" 
+                               value="${dataset.color}" 
+                               onchange="updateDatasetColor(${currentDatasetIndex}, this.value)"
+                               style="width: 40px; height: 40px; border: none; border-radius: 8px; cursor: pointer;">
+                        
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" 
+                                   ${dataset.visible ? 'checked' : ''}
+                                   onchange="toggleDatasetVisibility(${currentDatasetIndex})">
+                            Показать на графике
+                        </label>
+                    </div>
+                    
+                    <button class="btn-del" onclick="removeDataset(${currentDatasetIndex})" style="font-size: 1.2rem;">× Удалить</button>
                 </div>
-                <label>Название набора</label>
-                <input type="text" class="dataset-name" value="Данные ${document.querySelectorAll('.dataset-item').length + 1}" oninput="updateChart()" style="margin-bottom: 10px;">
                 
-                <label>Цвет графика</label>
-                <input type="color" class="dataset-color" value="${colors[colorIndex]}" onchange="updateChart()" style="margin-bottom: 10px;">
+                <div class="point-controls">
+                    ${dataset.values.map((value, i) => `
+                        <div class="point-item">
+                            <small>${chartData.labels[i] || `Точка ${i+1}`}</small>
+                            <input type="number" 
+                                   step="0.1"
+                                   value="${value.toFixed(2)}" 
+                                   oninput="updatePointValue(${currentDatasetIndex}, ${i}, this.value)"
+                                   class="point-value">
+                        </div>
+                    `).join('')}
+                </div>
                 
-                <label>Точки данных (через запятую)</label>
-                <input type="text" class="dataset-points" value="${[10,20,30,40,50].map(n => n + Math.floor(Math.random() * 20)).join(',')}" oninput="updateChart()" placeholder="Пример: 10,20,30,40,50">
-                
-                <label style="margin-top: 10px;">Метки (через запятую)</label>
-                <input type="text" class="dataset-labels" value="Янв,Фев,Мар,Апр,Май" oninput="updateChart()" placeholder="Пример: Янв,Фев,Мар" ${document.querySelectorAll('.dataset-item').length > 0 ? 'disabled' : ''}>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-action" onclick="addPoint(${currentDatasetIndex})" style="padding: 8px 16px; font-size: 0.8rem;">+ Точка</button>
+                    <button class="btn-action" onclick="randomizeDataset(${currentDatasetIndex})" style="padding: 8px 16px; font-size: 0.8rem;">🎲 Случайно</button>
+                </div>
             </div>
         `;
+    }
+
+    function updateDatasetName(index, name) {
+        chartData.datasets[index].name = name;
+        renderDatasetTabs();
+        initChart();
+    }
+
+    function updateDatasetColor(index, color) {
+        chartData.datasets[index].color = color;
+        initChart();
+    }
+
+    function toggleDatasetVisibility(index) {
+        chartData.datasets[index].visible = !chartData.datasets[index].visible;
+        renderDatasetTabs();
+        initChart();
+    }
+
+    function updatePointValue(datasetIndex, pointIndex, value) {
+        const numValue = parseFloat(value);
+        if (!isNaN(numValue)) {
+            chartData.datasets[datasetIndex].values[pointIndex] = numValue;
+            initChart();
+        }
+    }
+
+    function addPoint(datasetIndex) {
+        chartData.datasets.forEach(ds => {
+            ds.values.push(ds.values.length > 0 ? ds.values[ds.values.length - 1] : 0);
+        });
+        chartData.labels.push(`Точка ${chartData.labels.length + 1}`);
+        renderDatasetEditor();
+        initChart();
+    }
+
+    function randomizeDataset(datasetIndex) {
+        chartData.datasets[datasetIndex].values = chartData.datasets[datasetIndex].values.map(() => 
+            Math.random() * 50
+        );
+        renderDatasetEditor();
+        initChart();
+    }
+
+    function addDataset() {
+        const colors = ['#8e99a2', '#81c784', '#64b5f6', '#ba68c8', '#ffb74d', '#4db6ac'];
+        const colorIndex = chartData.datasets.length % colors.length;
         
-        document.getElementById('datasets-container').insertAdjacentHTML('beforeend', datasetHTML);
-        updateChart();
+        const newDataset = {
+            id: Date.now(),
+            name: `Данные ${chartData.datasets.length + 1}`,
+            color: colors[colorIndex],
+            values: chartData.labels.map(() => Math.random() * 50),
+            visible: true
+        };
+        
+        chartData.datasets.push(newDataset);
+        currentDatasetIndex = chartData.datasets.length - 1;
+        initChart();
     }
 
     function removeDataset(index) {
-        const datasets = document.querySelectorAll('.dataset-item');
-        if (datasets.length <= 1) {
+        if (chartData.datasets.length <= 1) {
             alert('Должен остаться хотя бы один набор данных');
             return;
         }
         
-        datasets[index].remove();
-        
-        // Переименовываем оставшиеся наборы
-        document.querySelectorAll('.dataset-item').forEach((item, i) => {
-            item.querySelector('h3').textContent = `Набор данных ${i + 1}`;
-        });
-        
-        updateChart();
+        chartData.datasets.splice(index, 1);
+        currentDatasetIndex = Math.max(0, currentDatasetIndex - 1);
+        initChart();
     }
 
     function downloadChart() {
         const chartCanvas = document.getElementById('myChart');
         
         html2canvas(chartCanvas, {
-            backgroundColor: document.getElementById('bg-color').value,
+            backgroundColor: '#24272b',
             scale: 2,
             logging: false,
             useCORS: true
@@ -774,41 +1167,24 @@
     function resetChart() {
         if (confirm('Сбросить все данные графика?')) {
             chartData = {
-                datasets: [{
-                    label: 'Данные 1',
-                    data: [10, 20, 30, 40, 50],
-                    backgroundColor: 'rgba(142, 153, 162, 0.2)',
-                    borderColor: 'rgba(142, 153, 162, 1)',
-                    borderWidth: 2,
-                    fill: true
-                }],
-                labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май']
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '00:00'],
+                datasets: [
+                    {
+                        id: 1,
+                        name: 'Данные 1',
+                        color: '#8e99a2',
+                        values: [10.5, 22.3, 35.7, 42.1, 38.4, 25.9, 12.7],
+                        visible: true
+                    }
+                ]
             };
             
-            document.getElementById('datasets-container').innerHTML = `
-                <div class="dataset-item">
-                    <div class="dataset-header">
-                        <h3 style="margin: 0;">Набор данных 1</h3>
-                        <button class="btn-del" onclick="removeDataset(0)">×</button>
-                    </div>
-                    <label>Название набора</label>
-                    <input type="text" class="dataset-name" value="Данные 1" oninput="updateChart()" style="margin-bottom: 10px;">
-                    
-                    <label>Цвет графика</label>
-                    <input type="color" class="dataset-color" value="#8e99a2" onchange="updateChart()" style="margin-bottom: 10px;">
-                    
-                    <label>Точки данных (через запятую)</label>
-                    <input type="text" class="dataset-points" value="10,20,30,40,50" oninput="updateChart()" placeholder="Пример: 10,20,30,40,50">
-                    
-                    <label style="margin-top: 10px;">Метки (через запятую)</label>
-                    <input type="text" class="dataset-labels" value="Янв,Фев,Мар,Апр,Май" oninput="updateChart()" placeholder="Пример: Янв,Фев,Мар">
-                </div>
-            `;
+            currentDatasetIndex = 0;
+            currentChartType = 'line';
             
-            document.getElementById('chart-title').value = 'Мой график';
-            document.getElementById('chart-custom-title').value = 'Анализ данных';
-            document.getElementById('bg-color').value = '#24272b';
-            document.getElementById('chart-type').value = 'line';
+            document.querySelectorAll('.graph-type-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === 0);
+            });
             
             saveChartData();
             initChart();
@@ -816,9 +1192,205 @@
     }
 
     function saveChartData() {
-        localStorage.setItem('chart_data', JSON.stringify(chartData));
+        localStorage.setItem('chart_data_v2', JSON.stringify(chartData));
     }
 
+    // ==================== ТАБЛИЦА ====================
+    function renderTable() {
+        document.getElementById('table-title').value = tableData.title;
+        
+        const headerRow = document.getElementById('table-header');
+        const tbody = document.getElementById('table-body');
+        
+        // Обновляем заголовки
+        headerRow.innerHTML = '<th style="min-width: 50px;">#</th>';
+        tableData.columns.forEach((col, index) => {
+            headerRow.innerHTML += `
+                <th contenteditable="true" 
+                    onblur="updateColumnName(${index}, this.textContent)"
+                    style="position: relative;">
+                    ${col}
+                    <button class="cell-btn" onclick="removeColumn(${index})" 
+                            style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); padding: 2px 6px; font-size: 0.7rem;">
+                        ×
+                    </button>
+                </th>
+            `;
+        });
+        
+        // Обновляем строки
+        tbody.innerHTML = '';
+        tableData.rows.forEach((row, rowIndex) => {
+            let rowHtml = `<tr>
+                <td style="font-weight: bold; background: rgba(255,255,255,0.02);">
+                    ${rowIndex + 1}
+                    <button class="cell-btn" onclick="removeRow(${rowIndex})" style="margin-left: 5px;">×</button>
+                </td>`;
+            
+            row.forEach((cell, colIndex) => {
+                rowHtml += `
+                    <td>
+                        <input type="text" 
+                               value="${cell}" 
+                               oninput="updateCell(${rowIndex}, ${colIndex}, this.value)"
+                               style="width: 100%;">
+                    </td>
+                `;
+            });
+            
+            rowHtml += '</tr>';
+            tbody.innerHTML += rowHtml;
+        });
+        
+        // Обновляем счетчики
+        document.getElementById('row-count').textContent = tableData.rows.length;
+        document.getElementById('col-count').textContent = tableData.columns.length;
+        
+        saveTableData();
+    }
+
+    function updateTableTitle() {
+        tableData.title = document.getElementById('table-title').value;
+        saveTableData();
+    }
+
+    function updateColumnName(index, name) {
+        if (index >= 0 && index < tableData.columns.length) {
+            tableData.columns[index] = name;
+            saveTableData();
+        }
+    }
+
+    function updateCell(rowIndex, colIndex, value) {
+        if (rowIndex >= 0 && rowIndex < tableData.rows.length && 
+            colIndex >= 0 && colIndex < tableData.columns.length) {
+            tableData.rows[rowIndex][colIndex] = value;
+            saveTableData();
+        }
+    }
+
+    function addRow() {
+        const newRow = new Array(tableData.columns.length).fill('');
+        tableData.rows.push(newRow);
+        renderTable();
+    }
+
+    function addColumn() {
+        tableData.columns.push(`Колонка ${tableData.columns.length + 1}`);
+        tableData.rows.forEach(row => row.push(''));
+        renderTable();
+    }
+
+    function removeRow(index) {
+        if (tableData.rows.length > 1) {
+            tableData.rows.splice(index, 1);
+            renderTable();
+        } else {
+            alert('Таблица должна содержать хотя бы одну строку');
+        }
+    }
+
+    function removeColumn(index) {
+        if (tableData.columns.length > 1) {
+            tableData.columns.splice(index, 1);
+            tableData.rows.forEach(row => row.splice(index, 1));
+            renderTable();
+        } else {
+            alert('Таблица должна содержать хотя бы один столбец');
+        }
+    }
+
+    function sortTable(columnIndex, order) {
+        tableData.rows.sort((a, b) => {
+            const valA = a[columnIndex] || '';
+            const valB = b[columnIndex] || '';
+            
+            if (order === 'asc') {
+                return valA.toString().localeCompare(valB.toString());
+            } else {
+                return valB.toString().localeCompare(valA.toString());
+            }
+        });
+        
+        renderTable();
+    }
+
+    function clearTable() {
+        if (confirm('Очистить всю таблицу?')) {
+            tableData = {
+                title: "Новая таблица",
+                columns: ["Колонка 1", "Колонка 2"],
+                rows: [
+                    ["", ""],
+                    ["", ""]
+                ]
+            };
+            renderTable();
+        }
+    }
+
+    function exportTablePNG() {
+        const tableElement = document.getElementById('data-table');
+        
+        html2canvas(tableElement, {
+            backgroundColor: '#24272b',
+            scale: 2,
+            logging: false,
+            useCORS: true
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `${tableData.title}-${new Date().toISOString().slice(0,10)}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    function exportTablePDF() {
+        const doc = new jsPDF({
+            orientation: tableData.columns.length > 5 ? 'landscape' : 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
+        
+        // Заголовок
+        doc.setFontSize(16);
+        doc.text(tableData.title, 14, 15);
+        
+        // Подготовка данных для таблицы
+        const tableBody = [];
+        tableData.rows.forEach(row => {
+            tableBody.push(row);
+        });
+        
+        // Создание таблицы
+        doc.autoTable({
+            head: [tableData.columns],
+            body: tableBody,
+            startY: 25,
+            theme: 'striped',
+            headStyles: {
+                fillColor: [36, 39, 43],
+                textColor: [225, 225, 225],
+                fontStyle: 'bold'
+            },
+            bodyStyles: {
+                fillColor: [26, 28, 30],
+                textColor: [225, 225, 225]
+            },
+            alternateRowStyles: {
+                fillColor: [30, 33, 36]
+            },
+            margin: { top: 25 }
+        });
+        
+        doc.save(`${tableData.title}.pdf`);
+    }
+
+    function saveTableData() {
+        localStorage.setItem('table_data', JSON.stringify(tableData));
+    }
+
+    // Инициализация
     renderSidebar();
 </script>
 </body>
