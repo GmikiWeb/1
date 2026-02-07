@@ -2,41 +2,285 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>HTML Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>system edit</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; }
-        #editor { display: flex; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; background: #1e1e1e; color: white; }
-        textarea { flex-grow: 1; margin: 15px 0; background: #2d2d2d; color: #00ff00; border: 1px solid #444; padding: 10px; font-family: monospace; resize: none; }
-        button { padding: 15px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; }
-        button:hover { background: #0056b3; }
-        iframe { width: 100vw; height: 100vh; border: none; display: none; }
+        :root {
+            --bg: #050505;
+            --panel: #0d0d0d;
+            --gold: #d4af37;
+            --gold-hover: #ffcc33;
+            --red: #ff3333;
+            --border: #222;
+            --radius: 20px;
+        }
+
+        * { box-sizing: border-box; transition: 0.2s ease-in-out; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg);
+            color: #eee;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Панель управления (Слева) */
+        #sidebar {
+            width: 350px;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+        }
+
+        .system-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .btn-create-user {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 15px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+
+        .btn-create-user:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+
+        #user-list { overflow-y: auto; flex-grow: 1; }
+        .user-tab {
+            padding: 18px;
+            background: #151515;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
+        }
+        .user-tab.active { border-color: var(--gold); background: #1a1a1a; }
+        .user-tab:hover:not(.active) { background: #222; }
+
+        /* Контент (Справа) */
+        #content { flex-grow: 1; padding: 60px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        
+        .editor-card {
+            width: 100%;
+            max-width: 800px;
+            background: #111;
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.8rem;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: #080808;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            outline: none;
+        }
+        input:focus { border-color: var(--gold); }
+
+        .task-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-del { background: none; border: none; color: #444; cursor: pointer; font-size: 1.2rem; }
+        .btn-del:hover { color: var(--red); }
+
+        .add-task-btn {
+            background: #222;
+            border: none;
+            color: #fff;
+            width: 35px;
+            height: 35px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .add-task-btn:hover { background: var(--gold); color: #000; }
+
+        /* Нижняя кнопка генерации */
+        #gen-trigger {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background: var(--gold);
+            color: #000;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-family: 'Oswald', sans-serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+        }
+        #gen-trigger:hover { transform: scale(1.05); background: var(--gold-hover); }
+
+        #final-output {
+            margin-top: 30px;
+            background: #000;
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px dashed var(--gold);
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            display: none;
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
 
-    <div id="editor">
-        <h2>Вставьте HTML код:</h2>
-        <textarea id="code" placeholder="<html><body><h1>Привет!</h1></body></html>"></textarea>
-        <button onclick="runCode()">Запустить на весь экран</button>
-        <p><small>Для выхода просто обновите страницу (F5)</small></p>
+<div id="sidebar">
+    <div class="system-title">Protocol v.2</div>
+    <button class="btn-create-user" onclick="createUser()">+ Создать профиль</button>
+    <div id="user-list"></div>
+</div>
+
+<div id="content">
+    <div id="editor" class="editor-card">
+        <span class="label">Имя пользователя</span>
+        <input type="text" id="inp-name" oninput="sync()">
+
+        <div style="height: 30px;"></div>
+
+        <span class="label">Задания (Обычные)</span>
+        <div id="list-std"></div>
+        <button class="add-task-btn" onclick="addTask('std')">+</button>
+
+        <div style="height: 30px;"></div>
+
+        <span class="label" style="color: var(--red);">Срочные задания</span>
+        <div id="list-urg"></div>
+        <button class="add-task-btn" onclick="addTask('urg')" style="border: 1px solid var(--red); color: var(--red);">+</button>
+
+        <div id="final-output"></div>
     </div>
 
-    <iframe id="preview"></iframe>
+    <div id="empty-hint" style="margin-top: 20%; color: #333; text-align: center;">
+        <h1 style="font-family: 'Oswald'; letter-spacing: 10px;">ВЫБЕРИТЕ ОБЪЕКТ</h1>
+    </div>
+</div>
 
-    <script>
-        function runCode() {
-            const code = document.getElementById('code').value;
-            const preview = document.getElementById('preview');
-            const editor = document.getElementById('editor');
-            
-            editor.style.display = 'none';
-            preview.style.display = 'block';
-            
-            const doc = preview.contentDocument || preview.contentWindow.document;
-            doc.open();
-            doc.write(code);
-            doc.close();
-        }
-    </script>
+<button id="gen-trigger" onclick="generateAll()">Сгенерировать общий промт</button>
+
+<script>
+    let users = JSON.parse(localStorage.getItem('brutal_data')) || [];
+    let cur = null;
+
+    function save() {
+        localStorage.setItem('brutal_data', JSON.stringify(users));
+        renderSidebar();
+    }
+
+    function createUser() {
+        users.push({ name: "Новый Пользователь", std: ["", "", ""], urg: [] });
+        save();
+        select(users.length - 1);
+    }
+
+    function renderSidebar() {
+        const div = document.getElementById('user-list');
+        div.innerHTML = users.map((u, i) => `
+            <div class="user-tab ${i === cur ? 'active' : ''}" onclick="select(${i})">
+                <span style="font-weight: 600;">${u.name}</span>
+                <span onclick="delUser(event, ${i})" style="color: #444;">×</span>
+            </div>
+        `).join('');
+    }
+
+    function select(i) {
+        cur = i;
+        document.getElementById('empty-hint').style.display = 'none';
+        document.getElementById('editor').style.display = 'block';
+        document.getElementById('inp-name').value = users[i].name;
+        renderTasks();
+        renderSidebar();
+    }
+
+    function renderTasks() {
+        const u = users[cur];
+        document.getElementById('list-std').innerHTML = u.std.map((t, i) => `
+            <div class="task-row">
+                <input type="text" value="${t}" placeholder="Описание задачи..." oninput="updTask('std', ${i}, this.value)">
+                <button class="btn-del" onclick="remTask('std', ${i})">×</button>
+            </div>
+        `).join('');
+        document.getElementById('list-urg').innerHTML = u.urg.map((t, i) => `
+            <div class="task-row">
+                <input type="text" value="${t}" placeholder="Срочное дело..." oninput="updTask('urg', ${i}, this.value)" style="border-color: #441111;">
+                <button class="btn-del" onclick="remTask('urg', ${i})">×</button>
+            </div>
+        `).join('');
+    }
+
+    function updTask(type, i, val) { users[cur][type][i] = val; localStorage.setItem('brutal_data', JSON.stringify(users)); }
+    function sync() { users[cur].name = document.getElementById('inp-name').value; save(); }
+    function addTask(type) { users[cur][type].push(""); renderTasks(); }
+    function remTask(type, i) { users[cur][type].splice(i, 1); renderTasks(); save(); }
+    function delUser(e, i) { e.stopPropagation(); users.splice(i, 1); cur = null; save(); location.reload(); }
+
+    function generateAll() {
+        if (users.length === 0) return;
+
+        let fullPrompt = "";
+        users.forEach((u) => {
+            const std = u.std.filter(t => t.trim());
+            const urg = u.urg.filter(t => t.trim());
+
+            fullPrompt += `Добавь новое задание пользователю "${u.name}". Задания ему дай следующие:\n`;
+            std.forEach((t, i) => fullPrompt += `${i + 1}. ${t}\n`);
+
+            if (urg.length > 0) {
+                fullPrompt += `\nСрочные задания:\n`;
+                urg.forEach((t, i) => fullPrompt += `${i + 1}. ${t}\n`);
+            }
+            fullPrompt += `\n---------------------------\n\n`;
+        });
+
+        const out = document.getElementById('final-output');
+        out.innerText = fullPrompt;
+        out.style.display = 'block';
+        navigator.clipboard.writeText(fullPrompt);
+        
+        const btn = document.getElementById('gen-trigger');
+        btn.innerText = "СКОПИРОВАНО В БУФЕР";
+        setTimeout(() => btn.innerText = "Сгенерировать общий промт", 2000);
+    }
+
+    renderSidebar();
+</script>
+
 </body>
 </html>
