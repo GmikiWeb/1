@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORE SYSTEM / PROMPT & DEV</title>
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <title>CORE SYSTEM / SANS-SERIF EDITION</title>
+    <!-- Подключаем мягкий и скругленный шрифт Ubuntu -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chart.js для графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2canvas для создания PNG -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root {
             --bg: #1a1c1e;
@@ -14,13 +19,17 @@
             --text: #e1e1e1;
             --text-dim: #9ba1a6;
             --red: #e57373;
-            --radius: 12px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --green: #81c784;
+            --blue: #64b5f6;
+            --purple: #ba68c8;
+            --radius: 14px;
+            --transition: all 0.25s ease;
         }
 
         * { box-sizing: border-box; }
+        
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Ubuntu', sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
@@ -30,10 +39,9 @@
             overflow: hidden;
         }
 
-        /* ANIMATIONS */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* TOP NAVIGATION */
+        /* NAV */
         nav {
             height: 64px;
             background: var(--panel);
@@ -46,12 +54,12 @@
         }
 
         .nav-item {
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             cursor: pointer;
             color: var(--text-dim);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             position: relative;
             transition: var(--transition);
         }
@@ -63,20 +71,18 @@
             bottom: -22px;
             left: 0;
             width: 100%;
-            height: 2px;
+            height: 3px;
             background: var(--accent);
-            animation: fadeIn 0.3s ease;
+            border-radius: 10px 10px 0 0;
         }
 
-        /* CONTENT */
+        /* WRAPPER */
         #main-wrapper { display: flex; flex-grow: 1; overflow: hidden; }
 
-        /* PROTOCOL VIEW */
-        #protocol-view { display: flex; width: 100%; height: 100%; animation: fadeIn 0.4s ease; }
-        
+        /* SIDEBAR */
         #sidebar {
             width: 320px;
-            background: rgba(30, 33, 36, 0.5);
+            background: rgba(30, 33, 36, 0.4);
             backdrop-filter: blur(10px);
             border-right: 1px solid rgba(255,255,255,0.05);
             padding: 30px;
@@ -88,14 +94,14 @@
             background: var(--surface);
             color: var(--text);
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px 20px;
+            padding: 14px 20px;
             border-radius: var(--radius);
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
-            font-family: inherit;
+            font-family: 'Ubuntu', sans-serif;
         }
-        .btn-action:hover { background: #2f3338; border-color: var(--accent); transform: translateY(-1px); }
+        .btn-action:hover { background: #2f3338; border-color: var(--accent); transform: translateY(-2px); }
 
         .user-tab {
             padding: 16px;
@@ -106,64 +112,134 @@
             cursor: pointer;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             transition: var(--transition);
+            animation: fadeIn 0.3s ease;
         }
-        .user-tab:hover { background: rgba(255,255,255,0.05); }
-        .user-tab.active { border-color: var(--accent); background: rgba(255,255,255,0.08); }
+        .user-tab.active { border-color: var(--accent); background: rgba(255,255,255,0.08); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
+        /* CONTENT */
         #protocol-content { flex-grow: 1; padding: 60px; overflow-y: auto; }
         .card { 
             background: var(--surface); 
-            padding: 40px; 
-            border-radius: 20px; 
-            max-width: 850px; 
+            padding: 45px; 
+            border-radius: 24px; 
+            max-width: 800px; 
             margin: 0 auto; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            animation: fadeIn 0.5s ease;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s ease-out;
         }
 
-        label { color: var(--text-dim); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        label { 
+            color: var(--text-dim); 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            margin-bottom: 12px; 
+            display: block; 
+        }
 
         input[type="text"] {
             width: 100%;
             background: #1a1c1e;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.05);
             color: #fff;
-            padding: 14px;
-            border-radius: 8px;
+            padding: 16px;
+            border-radius: 12px;
             margin-bottom: 15px;
             outline: none;
             transition: var(--transition);
+            font-family: 'Ubuntu', sans-serif;
+            font-size: 1rem;
         }
         input[type="text"]:focus { border-color: var(--accent); background: #141618; }
 
-        /* EDITOR VIEW */
+        /* EDITOR */
         #editor-view { display: none; width: 100%; height: 100%; padding: 30px; gap: 30px; animation: fadeIn 0.4s ease; }
         .editor-container { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         textarea {
             flex-grow: 1;
             background: #141618;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.05);
             border-radius: var(--radius);
             padding: 25px;
             color: #b5cea8;
             font-family: 'JetBrains Mono', monospace;
-            resize: none; outline: none;
+            resize: none; outline: none; font-size: 0.95rem;
         }
-        iframe { flex: 1; border-radius: var(--radius); border: none; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        iframe { flex: 1; border-radius: var(--radius); border: none; background: white; }
 
-        .btn-del { color: #555; background: none; border: none; cursor: pointer; font-size: 1.2rem; transition: var(--transition); }
+        /* GRAPH VIEW */
+        #graph-view {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            gap: 30px;
+            animation: fadeIn 0.4s ease;
+            flex-direction: column;
+        }
+
+        .graph-controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: var(--surface);
+            padding: 25px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: var(--bg);
+        }
+
+        .graph-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 25px;
+            position: relative;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            background: rgba(255,255,255,0.02);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .btn-del { color: #555; background: none; border: none; cursor: pointer; font-size: 1.4rem; line-height: 1; }
         .btn-del:hover { color: var(--red); }
 
         #gen-trigger {
             position: fixed;
             bottom: 40px;
             right: 40px;
-            background: var(--text);
-            color: var(--bg);
-            border-radius: 30px;
-            padding: 18px 36px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            background: #fff;
+            color: #000;
+            border-radius: 40px;
+            padding: 20px 40px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            font-size: 1rem;
         }
 
         .output-box {
@@ -174,7 +250,101 @@
             font-family: 'JetBrains Mono', monospace;
             white-space: pre-wrap;
             display: none;
-            border-left: 3px solid var(--accent);
+            border-left: 4px solid var(--accent);
+            animation: fadeIn 0.3s ease;
+        }
+
+        select {
+            background: var(--bg);
+            color: var(--text);
+            border: 2px solid rgba(255,255,255,0.05);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-family: 'Ubuntu', sans-serif;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        select:focus {
+            border-color: var(--accent);
+        }
+
+        .data-points {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .point-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .point-input {
+            flex: 1;
+            background: var(--bg);
+            border: 2px solid rgba(255,255,255,0.05);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-small:hover {
+            background: var(--surface);
+            border-color: var(--accent);
+        }
+
+        .dataset-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .dataset-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dataset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .chart-title-input {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 5px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .chart-title-input:focus {
+            outline: none;
+            border-bottom-color: var(--accent);
         }
     </style>
 </head>
@@ -183,53 +353,128 @@
 <nav>
     <div class="nav-item active" id="nav-prot" onclick="switchMode('protocol')">1. Протокол</div>
     <div class="nav-item" id="nav-edit" onclick="switchMode('editor')">2. Редактор</div>
+    <div class="nav-item" id="nav-graph" onclick="switchMode('graph')">3. График</div>
 </nav>
 
 <div id="main-wrapper">
-    <div id="protocol-view">
+    <div id="protocol-view" style="display: flex; width: 100%;">
         <div id="sidebar">
-            <button class="btn-action" onclick="createUser()" style="width: 100%; border-style: dashed;">+ Добавить субъект</button>
+            <button class="btn-action" onclick="createUser()" style="width: 100%; border-style: dashed; border-width: 2px;">+ Добавить субъект</button>
             <div id="user-list" style="margin-top: 20px;"></div>
         </div>
         <div id="protocol-content">
             <div id="editor-card" class="card" style="display:none">
-                <label>Имя пользователя</label>
-                <input type="text" id="inp-name" oninput="sync()">
+                <label>Идентификация (Имя)</label>
+                <input type="text" id="inp-name" placeholder="Введите имя..." oninput="sync()">
                 
-                <div style="height: 30px;"></div>
+                <div style="height: 25px;"></div>
                 
-                <label>Стандартный реестр задач</label>
+                <label>Реестр стандартных задач</label>
                 <div id="list-std"></div>
-                <button class="btn-action" onclick="addTask('std')" style="font-size: 0.8rem;">+ Пункт</button>
+                <button class="btn-action" onclick="addTask('std')" style="padding: 8px 20px; font-size: 0.8rem;">+ Добавить задачу</button>
 
-                <div style="height: 40px;"></div>
+                <div style="height: 35px;"></div>
                 
-                <label style="color: var(--red);">Критические задачи</label>
+                <label style="color: var(--red);">Критические директивы</label>
                 <div id="list-urg"></div>
-                <button class="btn-action" onclick="addTask('urg')" style="font-size: 0.8rem; border-color: rgba(229,115,115,0.3);">+ Срочно</button>
+                <button class="btn-action" onclick="addTask('urg')" style="padding: 8px 20px; font-size: 0.8rem; border-color: rgba(229,115,115,0.3);">+ Добавить срочно</button>
                 
                 <div id="final-output" class="output-box"></div>
             </div>
-            <div id="empty-hint" style="text-align:center; margin-top:20%; opacity:0.1"><h1>СИСТЕМА ГОТОВА</h1></div>
+            <div id="empty-hint" style="text-align:center; margin-top:20%; opacity:0.1; transition: 0.5s;">
+                <h1 style="font-size: 3rem; font-weight: 700;">SYSTEM CORE</h1>
+            </div>
         </div>
-        <button id="gen-trigger" class="btn-action" style="background: #fff; color: #000;" onclick="generateAll()">СКОПИРОВАТЬ ПРОМТ</button>
+        <button id="gen-trigger" class="btn-action" onclick="generateAll()">СКОПИРОВАТЬ ПРОМТ</button>
     </div>
 
     <div id="editor-view">
         <div class="editor-container">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-action" onclick="runCode()">Запустить выполнение</button>
-                <button class="btn-action" onclick="clearEditor()" style="color: var(--red);">Очистить консоль</button>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-action" onclick="runCode()">Запустить</button>
+                <button class="btn-action" onclick="clearEditor()" style="color: var(--red);">Очистить</button>
             </div>
-            <textarea id="html-code" placeholder="Введите ваш HTML код здесь..."></textarea>
+            <textarea id="html-code" placeholder="<html>
+<style> body { background: #eee; } </style>
+<body> <h1>Hello World</h1> </body>
+</html>"></textarea>
         </div>
         <iframe id="preview"></iframe>
+    </div>
+
+    <div id="graph-view">
+        <div class="graph-controls">
+            <div class="control-group">
+                <label>Тип графика</label>
+                <select id="chart-type" onchange="updateChart()">
+                    <option value="line">Линейный</option>
+                    <option value="bar">Столбчатый</option>
+                    <option value="radar">Радар</option>
+                    <option value="pie">Круговая диаграмма</option>
+                    <option value="doughnut">Кольцевая</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Название графика</label>
+                <input type="text" id="chart-title" value="Мой график" oninput="updateChart()" class="point-input">
+            </div>
+            <div class="control-group">
+                <label>Цвет фона</label>
+                <input type="color" id="bg-color" value="#24272b" class="color-picker" onchange="updateChart()">
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <input type="text" id="chart-custom-title" value="Анализ данных" class="chart-title-input" oninput="updateChart()">
+            
+            <div class="chart-wrapper">
+                <canvas id="myChart"></canvas>
+            </div>
+
+            <div class="dataset-controls">
+                <button class="btn-action" onclick="addDataset()">+ Добавить набор данных</button>
+                <button class="btn-action" onclick="downloadChart()" style="background: var(--green);">↓ Скачать PNG</button>
+                <button class="btn-action" onclick="resetChart()" style="background: var(--red);">Сбросить</button>
+            </div>
+
+            <div id="datasets-container">
+                <div class="dataset-item">
+                    <div class="dataset-header">
+                        <h3 style="margin: 0;">Набор данных 1</h3>
+                        <button class="btn-del" onclick="removeDataset(0)">×</button>
+                    </div>
+                    <label>Название набора</label>
+                    <input type="text" class="dataset-name" value="Данные 1" oninput="updateChart()" style="margin-bottom: 10px;">
+                    
+                    <label>Цвет графика</label>
+                    <input type="color" class="dataset-color" value="#8e99a2" onchange="updateChart()" style="margin-bottom: 10px;">
+                    
+                    <label>Точки данных (через запятую)</label>
+                    <input type="text" class="dataset-points" value="10,20,30,40,50" oninput="updateChart()" placeholder="Пример: 10,20,30,40,50">
+                    
+                    <label style="margin-top: 10px;">Метки (через запятую)</label>
+                    <input type="text" class="dataset-labels" value="Янв,Фев,Мар,Апр,Май" oninput="updateChart()" placeholder="Пример: Янв,Фев,Мар">
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    let users = JSON.parse(localStorage.getItem('grey_db')) || [];
+    let users = JSON.parse(localStorage.getItem('soft_db_v4')) || [];
     let cur = null;
+    let chart = null;
+    let chartData = JSON.parse(localStorage.getItem('chart_data')) || {
+        datasets: [{
+            label: 'Данные 1',
+            data: [10, 20, 30, 40, 50],
+            backgroundColor: 'rgba(142, 153, 162, 0.2)',
+            borderColor: 'rgba(142, 153, 162, 1)',
+            borderWidth: 2,
+            fill: true
+        }],
+        labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май']
+    };
 
     function switchMode(mode) {
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -237,22 +482,37 @@
             document.getElementById('nav-prot').classList.add('active');
             document.getElementById('protocol-view').style.display = 'flex';
             document.getElementById('editor-view').style.display = 'none';
+            document.getElementById('graph-view').style.display = 'none';
             document.getElementById('gen-trigger').style.display = 'block';
-        } else {
+        } else if(mode === 'editor') {
             document.getElementById('nav-edit').classList.add('active');
             document.getElementById('protocol-view').style.display = 'none';
             document.getElementById('editor-view').style.display = 'flex';
+            document.getElementById('graph-view').style.display = 'none';
             document.getElementById('gen-trigger').style.display = 'none';
+        } else if(mode === 'graph') {
+            document.getElementById('nav-graph').classList.add('active');
+            document.getElementById('protocol-view').style.display = 'none';
+            document.getElementById('editor-view').style.display = 'none';
+            document.getElementById('graph-view').style.display = 'flex';
+            document.getElementById('gen-trigger').style.display = 'none';
+            setTimeout(initChart, 100);
         }
     }
 
-    function save() { localStorage.setItem('grey_db', JSON.stringify(users)); renderSidebar(); }
-    function createUser() { users.push({ name: "Иван", std: ["", "", ""], urg: [] }); save(); select(users.length - 1); }
+    function save() { localStorage.setItem('soft_db_v4', JSON.stringify(users)); renderSidebar(); }
+    
+    // Создание пользователя с ПУСТЫМ именем
+    function createUser() { 
+        users.push({ name: "", std: ["", "", ""], urg: [] }); 
+        save(); 
+        select(users.length - 1); 
+    }
     
     function renderSidebar() {
         document.getElementById('user-list').innerHTML = users.map((u, i) => `
             <div class="user-tab ${i === cur ? 'active' : ''}" onclick="select(${i})">
-                <span>${u.name}</span>
+                <span style="font-weight: 600;">${u.name || 'Без имени'}</span>
                 <button class="btn-del" onclick="delUser(event, ${i})">×</button>
             </div>`).join('');
     }
@@ -268,18 +528,18 @@
     function renderTasks() {
         const u = users[cur];
         document.getElementById('list-std').innerHTML = u.std.map((t, i) => `
-            <div style="display:flex; gap:10px; margin-bottom:10px; animation: fadeIn 0.3s ease;">
-                <input type="text" value="${t}" placeholder="Описание..." oninput="updTask('std', ${i}, this.value)">
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+                <input type="text" value="${t}" placeholder="Описание задания..." oninput="updTask('std', ${i}, this.value)">
                 <button class="btn-del" onclick="remTask('std', ${i})">×</button>
             </div>`).join('');
         document.getElementById('list-urg').innerHTML = u.urg.map((t, i) => `
-            <div style="display:flex; gap:10px; margin-bottom:10px; animation: fadeIn 0.3s ease;">
-                <input type="text" value="${t}" placeholder="Срочная задача..." oninput="updTask('urg', ${i}, this.value)" style="border-color: rgba(229,115,115,0.2)">
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+                <input type="text" value="${t}" placeholder="Срочное распоряжение..." oninput="updTask('urg', ${i}, this.value)" style="border-color: rgba(229,115,115,0.2)">
                 <button class="btn-del" onclick="remTask('urg', ${i})">×</button>
             </div>`).join('');
     }
 
-    function updTask(type, i, v) { users[cur][type][i] = v; localStorage.setItem('grey_db', JSON.stringify(users)); }
+    function updTask(type, i, v) { users[cur][type][i] = v; localStorage.setItem('soft_db_v4', JSON.stringify(users)); }
     function sync() { users[cur].name = document.getElementById('inp-name').value; save(); }
     function addTask(type) { users[cur][type].push(""); renderTasks(); }
     function remTask(type, i) { users[cur][type].splice(i, 1); renderTasks(); save(); }
@@ -288,6 +548,7 @@
     function generateAll() {
         let p = "";
         users.forEach(u => {
+            if(!u.name.trim()) return;
             const std = u.std.filter(t => t.trim());
             const urg = u.urg.filter(t => t.trim());
             p += `Добавь новое задание пользователю "${u.name}". Задания ему дай следующие:\n`;
@@ -301,7 +562,7 @@
         const out = document.getElementById('final-output');
         out.innerText = p; out.style.display = 'block';
         navigator.clipboard.writeText(p);
-        alert("ОТЧЕТ СФОРМИРОВАН И СКОПИРОВАН");
+        alert("ГОТОВО: Общий промт в буфере обмена");
     }
 
     function runCode() {
@@ -313,6 +574,249 @@
     function clearEditor() {
         document.getElementById('html-code').value = "";
         document.getElementById('preview').src = "about:blank";
+    }
+
+    // ==================== ГРАФИКИ ====================
+    function initChart() {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        
+        // Удаляем предыдущий график если есть
+        if (chart) {
+            chart.destroy();
+        }
+        
+        const chartType = document.getElementById('chart-type').value;
+        const bgColor = document.getElementById('bg-color').value;
+        const chartTitle = document.getElementById('chart-custom-title').value;
+        
+        // Обновляем данные из UI
+        updateChartDataFromUI();
+        
+        chart = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: chartData.labels,
+                datasets: chartData.datasets.map(dataset => ({
+                    ...dataset,
+                    pointBackgroundColor: dataset.borderColor,
+                    pointBorderColor: '#fff',
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#e1e1e1',
+                            font: {
+                                family: 'Ubuntu',
+                                size: 14
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: chartTitle,
+                        color: '#e1e1e1',
+                        font: {
+                            family: 'Ubuntu',
+                            size: 18,
+                            weight: 'bold'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 33, 36, 0.9)',
+                        titleColor: '#e1e1e1',
+                        bodyColor: '#e1e1e1',
+                        borderColor: 'rgba(142, 153, 162, 0.5)',
+                        borderWidth: 1
+                    }
+                },
+                scales: chartType !== 'pie' && chartType !== 'doughnut' && chartType !== 'radar' ? {
+                    x: {
+                        grid: {
+                            color: 'rgba(255,255,255,0.1)'
+                        },
+                        ticks: {
+                            color: '#9ba1a6'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255,255,255,0.1)'
+                        },
+                        ticks: {
+                            color: '#9ba1a6'
+                        },
+                        beginAtZero: true
+                    }
+                } : {},
+                backgroundColor: bgColor
+            }
+        });
+        
+        // Сохраняем данные в localStorage
+        saveChartData();
+    }
+
+    function updateChartDataFromUI() {
+        const datasets = [];
+        const labelsInput = document.querySelector('.dataset-labels');
+        
+        // Собираем все наборы данных
+        document.querySelectorAll('.dataset-item').forEach((item, index) => {
+            const name = item.querySelector('.dataset-name').value;
+            const color = item.querySelector('.dataset-color').value;
+            const points = item.querySelector('.dataset-points').value
+                .split(',')
+                .map(p => parseFloat(p.trim()))
+                .filter(p => !isNaN(p));
+            
+            const rgbColor = hexToRgb(color);
+            
+            datasets.push({
+                label: name,
+                data: points,
+                backgroundColor: `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 0.2)`,
+                borderColor: `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, 1)`,
+                borderWidth: 2,
+                fill: true
+            });
+            
+            // Берем метки из первого набора
+            if (index === 0 && labelsInput) {
+                chartData.labels = labelsInput.value.split(',').map(l => l.trim());
+            }
+        });
+        
+        chartData.datasets = datasets;
+    }
+
+    function updateChart() {
+        updateChartDataFromUI();
+        initChart();
+    }
+
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 142, g: 153, b: 162 };
+    }
+
+    function addDataset() {
+        const colors = ['#8e99a2', '#81c784', '#64b5f6', '#ba68c8', '#ffb74d', '#4db6ac'];
+        const colorIndex = document.querySelectorAll('.dataset-item').length % colors.length;
+        
+        const datasetHTML = `
+            <div class="dataset-item">
+                <div class="dataset-header">
+                    <h3 style="margin: 0;">Набор данных ${document.querySelectorAll('.dataset-item').length + 1}</h3>
+                    <button class="btn-del" onclick="removeDataset(${document.querySelectorAll('.dataset-item').length})">×</button>
+                </div>
+                <label>Название набора</label>
+                <input type="text" class="dataset-name" value="Данные ${document.querySelectorAll('.dataset-item').length + 1}" oninput="updateChart()" style="margin-bottom: 10px;">
+                
+                <label>Цвет графика</label>
+                <input type="color" class="dataset-color" value="${colors[colorIndex]}" onchange="updateChart()" style="margin-bottom: 10px;">
+                
+                <label>Точки данных (через запятую)</label>
+                <input type="text" class="dataset-points" value="${[10,20,30,40,50].map(n => n + Math.floor(Math.random() * 20)).join(',')}" oninput="updateChart()" placeholder="Пример: 10,20,30,40,50">
+                
+                <label style="margin-top: 10px;">Метки (через запятую)</label>
+                <input type="text" class="dataset-labels" value="Янв,Фев,Мар,Апр,Май" oninput="updateChart()" placeholder="Пример: Янв,Фев,Мар" ${document.querySelectorAll('.dataset-item').length > 0 ? 'disabled' : ''}>
+            </div>
+        `;
+        
+        document.getElementById('datasets-container').insertAdjacentHTML('beforeend', datasetHTML);
+        updateChart();
+    }
+
+    function removeDataset(index) {
+        const datasets = document.querySelectorAll('.dataset-item');
+        if (datasets.length <= 1) {
+            alert('Должен остаться хотя бы один набор данных');
+            return;
+        }
+        
+        datasets[index].remove();
+        
+        // Переименовываем оставшиеся наборы
+        document.querySelectorAll('.dataset-item').forEach((item, i) => {
+            item.querySelector('h3').textContent = `Набор данных ${i + 1}`;
+        });
+        
+        updateChart();
+    }
+
+    function downloadChart() {
+        const chartCanvas = document.getElementById('myChart');
+        
+        html2canvas(chartCanvas, {
+            backgroundColor: document.getElementById('bg-color').value,
+            scale: 2,
+            logging: false,
+            useCORS: true
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `график-${new Date().toISOString().slice(0,10)}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    function resetChart() {
+        if (confirm('Сбросить все данные графика?')) {
+            chartData = {
+                datasets: [{
+                    label: 'Данные 1',
+                    data: [10, 20, 30, 40, 50],
+                    backgroundColor: 'rgba(142, 153, 162, 0.2)',
+                    borderColor: 'rgba(142, 153, 162, 1)',
+                    borderWidth: 2,
+                    fill: true
+                }],
+                labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май']
+            };
+            
+            document.getElementById('datasets-container').innerHTML = `
+                <div class="dataset-item">
+                    <div class="dataset-header">
+                        <h3 style="margin: 0;">Набор данных 1</h3>
+                        <button class="btn-del" onclick="removeDataset(0)">×</button>
+                    </div>
+                    <label>Название набора</label>
+                    <input type="text" class="dataset-name" value="Данные 1" oninput="updateChart()" style="margin-bottom: 10px;">
+                    
+                    <label>Цвет графика</label>
+                    <input type="color" class="dataset-color" value="#8e99a2" onchange="updateChart()" style="margin-bottom: 10px;">
+                    
+                    <label>Точки данных (через запятую)</label>
+                    <input type="text" class="dataset-points" value="10,20,30,40,50" oninput="updateChart()" placeholder="Пример: 10,20,30,40,50">
+                    
+                    <label style="margin-top: 10px;">Метки (через запятую)</label>
+                    <input type="text" class="dataset-labels" value="Янв,Фев,Мар,Апр,Май" oninput="updateChart()" placeholder="Пример: Янв,Фев,Мар">
+                </div>
+            `;
+            
+            document.getElementById('chart-title').value = 'Мой график';
+            document.getElementById('chart-custom-title').value = 'Анализ данных';
+            document.getElementById('bg-color').value = '#24272b';
+            document.getElementById('chart-type').value = 'line';
+            
+            saveChartData();
+            initChart();
+        }
+    }
+
+    function saveChartData() {
+        localStorage.setItem('chart_data', JSON.stringify(chartData));
     }
 
     renderSidebar();
