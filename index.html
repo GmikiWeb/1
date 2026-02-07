@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML Viewer</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; }
+        #editor { display: flex; flex-direction: column; height: 100vh; padding: 20px; box-sizing: border-box; background: #1e1e1e; color: white; }
+        textarea { flex-grow: 1; margin: 15px 0; background: #2d2d2d; color: #00ff00; border: 1px solid #444; padding: 10px; font-family: monospace; resize: none; }
+        button { padding: 15px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        iframe { width: 100vw; height: 100vh; border: none; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="editor">
+        <h2>Вставьте HTML код:</h2>
+        <textarea id="code" placeholder="<html><body><h1>Привет!</h1></body></html>"></textarea>
+        <button onclick="runCode()">Запустить на весь экран</button>
+        <p><small>Для выхода просто обновите страницу (F5)</small></p>
+    </div>
+
+    <iframe id="preview"></iframe>
+
+    <script>
+        function runCode() {
+            const code = document.getElementById('code').value;
+            const preview = document.getElementById('preview');
+            const editor = document.getElementById('editor');
+            
+            editor.style.display = 'none';
+            preview.style.display = 'block';
+            
+            const doc = preview.contentDocument || preview.contentWindow.document;
+            doc.open();
+            doc.write(code);
+            doc.close();
+        }
+    </script>
+</body>
+</html>
