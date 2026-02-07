@@ -3,25 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP SYSTEM: PROTOCOL & SANDBOX</title>
+    <title>CORE SYSTEM / PROMPT & DEV</title>
     <link href="https://fonts.googleapis.com" rel="stylesheet">
     <style>
         :root {
-            --bg: #050505;
-            --panel: #0d0d0d;
-            --gold: #d4af37;
-            --gold-hover: #ffcc33;
-            --red: #ff3333;
-            --border: #222;
-            --radius-lg: 24px;
-            --radius-sm: 12px;
+            --bg: #1a1c1e;
+            --surface: #24272b;
+            --panel: #1e2124;
+            --accent: #8e99a2;
+            --text: #e1e1e1;
+            --text-dim: #9ba1a6;
+            --red: #e57373;
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { box-sizing: border-box; transition: 0.2s ease-in-out; }
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg);
-            color: #eee;
+            color: var(--text);
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -29,191 +30,207 @@
             overflow: hidden;
         }
 
-        /* ВЕРХНЕЕ МЕНЮ */
+        /* ANIMATIONS */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* TOP NAVIGATION */
         nav {
-            height: 70px;
+            height: 64px;
             background: var(--panel);
-            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             padding: 0 40px;
             gap: 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             z-index: 100;
         }
 
         .nav-item {
-            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             cursor: pointer;
-            color: #444;
-            font-size: 1.1rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
             position: relative;
+            transition: var(--transition);
         }
 
-        .nav-item.active { color: var(--gold); }
+        .nav-item.active { color: #fff; }
         .nav-item.active::after {
             content: '';
             position: absolute;
-            bottom: -24px;
+            bottom: -22px;
             left: 0;
             width: 100%;
-            height: 3px;
-            background: var(--gold);
+            height: 2px;
+            background: var(--accent);
+            animation: fadeIn 0.3s ease;
         }
 
-        /* ОСНОВНАЯ ОБЛАСТЬ */
-        #main-wrapper {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
-        }
+        /* CONTENT */
+        #main-wrapper { display: flex; flex-grow: 1; overflow: hidden; }
 
-        /* РЕЖИМ 1: ПРОТОКОЛ */
-        #protocol-view { display: flex; width: 100%; height: 100%; }
+        /* PROTOCOL VIEW */
+        #protocol-view { display: flex; width: 100%; height: 100%; animation: fadeIn 0.4s ease; }
         
         #sidebar {
             width: 320px;
-            background: var(--panel);
-            border-right: 1px solid var(--border);
+            background: rgba(30, 33, 36, 0.5);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255,255,255,0.05);
             padding: 30px;
             display: flex;
             flex-direction: column;
         }
 
-        .btn-gold {
-            background: var(--gold);
-            color: #000;
-            border: none;
-            padding: 14px;
-            border-radius: var(--radius-sm);
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
+        .btn-action {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
+            transition: var(--transition);
+            font-family: inherit;
         }
+        .btn-action:hover { background: #2f3338; border-color: var(--accent); transform: translateY(-1px); }
 
         .user-tab {
-            padding: 15px;
-            background: #151515;
-            border-radius: var(--radius-sm);
-            margin-top: 10px;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius);
+            margin-top: 12px;
             cursor: pointer;
-            border: 1px solid transparent;
             display: flex;
             justify-content: space-between;
+            transition: var(--transition);
         }
-        .user-tab.active { border-color: var(--gold); background: #1a1a1a; }
+        .user-tab:hover { background: rgba(255,255,255,0.05); }
+        .user-tab.active { border-color: var(--accent); background: rgba(255,255,255,0.08); }
 
-        #protocol-content { flex-grow: 1; padding: 50px; overflow-y: auto; }
-        .card { background: #111; padding: 40px; border-radius: var(--radius-lg); border: 1px solid var(--border); max-width: 800px; margin: 0 auto; }
+        #protocol-content { flex-grow: 1; padding: 60px; overflow-y: auto; }
+        .card { 
+            background: var(--surface); 
+            padding: 40px; 
+            border-radius: 20px; 
+            max-width: 850px; 
+            margin: 0 auto; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s ease;
+        }
 
-        /* РЕЖИМ 2: РЕДАКТОР */
-        #editor-view {
-            display: none;
+        label { color: var(--text-dim); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+
+        input[type="text"] {
             width: 100%;
-            height: 100%;
-            padding: 30px;
-            gap: 20px;
+            background: #1a1c1e;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            outline: none;
+            transition: var(--transition);
         }
+        input[type="text"]:focus { border-color: var(--accent); background: #141618; }
 
-        .editor-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        /* EDITOR VIEW */
+        #editor-view { display: none; width: 100%; height: 100%; padding: 30px; gap: 30px; animation: fadeIn 0.4s ease; }
+        .editor-container { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         textarea {
             flex-grow: 1;
-            background: #080808;
-            border: 1px solid var(--border);
-            color: #4ade80;
-            padding: 20px;
-            border-radius: var(--radius-sm);
-            font-family: 'Fira Code', monospace;
-            resize: none;
-            outline: none;
-            font-size: 0.9rem;
+            background: #141618;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius);
+            padding: 25px;
+            color: #b5cea8;
+            font-family: 'JetBrains Mono', monospace;
+            resize: none; outline: none;
         }
+        iframe { flex: 1; border-radius: var(--radius); border: none; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 
-        iframe {
-            flex: 1;
-            background: white;
-            border-radius: var(--radius-sm);
-            border: none;
-        }
-
-        .editor-controls { display: flex; gap: 10px; margin-bottom: 10px; }
-
-        /* КНОПКИ */
-        .btn-action { background: #222; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Oswald', sans-serif; }
-        .btn-action:hover { background: var(--gold); color: #000; }
-        .btn-red { background: #2a1111; color: var(--red); border: 1px solid var(--red); }
-        .btn-red:hover { background: var(--red); color: #fff; }
-
-        input[type="text"] { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-        .task-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .btn-del { color: #555; background: none; border: none; cursor: pointer; font-size: 1.2rem; transition: var(--transition); }
+        .btn-del:hover { color: var(--red); }
 
         #gen-trigger {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
+            bottom: 40px;
+            right: 40px;
+            background: var(--text);
+            color: var(--bg);
+            border-radius: 30px;
+            padding: 18px 36px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        .output-box {
+            margin-top: 30px;
+            background: #141618;
+            padding: 25px;
+            border-radius: var(--radius);
+            font-family: 'JetBrains Mono', monospace;
+            white-space: pre-wrap;
+            display: none;
+            border-left: 3px solid var(--accent);
         }
     </style>
 </head>
 <body>
 
 <nav>
-    <div class="nav-item active" id="nav-prot" onclick="switchMode('protocol')">1/Протокол</div>
-    <div class="nav-item" id="nav-edit" onclick="switchMode('editor')">2/Редактор</div>
+    <div class="nav-item active" id="nav-prot" onclick="switchMode('protocol')">1. Протокол</div>
+    <div class="nav-item" id="nav-edit" onclick="switchMode('editor')">2. Редактор</div>
 </nav>
 
 <div id="main-wrapper">
-    <!-- ПРОТОКОЛ -->
     <div id="protocol-view">
         <div id="sidebar">
-            <button class="btn-gold" style="width:100%" onclick="createUser()">+ Новый профиль</button>
-            <div id="user-list" style="margin-top:20px"></div>
+            <button class="btn-action" onclick="createUser()" style="width: 100%; border-style: dashed;">+ Добавить субъект</button>
+            <div id="user-list" style="margin-top: 20px;"></div>
         </div>
         <div id="protocol-content">
             <div id="editor-card" class="card" style="display:none">
-                <label style="color:var(--gold); font-size: 0.7rem; text-transform: uppercase;">Имя объекта</label>
+                <label>Имя пользователя</label>
                 <input type="text" id="inp-name" oninput="sync()">
-                <hr style="border:0; border-top:1px solid #222; margin: 30px 0;">
-                <label style="color:var(--gold); font-size: 0.7rem; text-transform: uppercase;">Стандартные задачи</label>
+                
+                <div style="height: 30px;"></div>
+                
+                <label>Стандартный реестр задач</label>
                 <div id="list-std"></div>
-                <button class="btn-action" onclick="addTask('std')">+</button>
-                <div style="height:30px"></div>
-                <label style="color:var(--red); font-size: 0.7rem; text-transform: uppercase;">Срочные директивы</label>
+                <button class="btn-action" onclick="addTask('std')" style="font-size: 0.8rem;">+ Пункт</button>
+
+                <div style="height: 40px;"></div>
+                
+                <label style="color: var(--red);">Критические задачи</label>
                 <div id="list-urg"></div>
-                <button class="btn-action" onclick="addTask('urg')">+</button>
-                <pre id="final-output" style="margin-top:30px; background:#000; padding:15px; display:none; border:1px dashed #333; font-size:0.8rem;"></pre>
+                <button class="btn-action" onclick="addTask('urg')" style="font-size: 0.8rem; border-color: rgba(229,115,115,0.3);">+ Срочно</button>
+                
+                <div id="final-output" class="output-box"></div>
             </div>
-            <div id="empty-hint" style="text-align:center; margin-top:20%; opacity:0.2"><h1>ВЫБЕРИТЕ ОБЪЕКТ</h1></div>
+            <div id="empty-hint" style="text-align:center; margin-top:20%; opacity:0.1"><h1>СИСТЕМА ГОТОВА</h1></div>
         </div>
-        <button id="gen-trigger" class="btn-gold" style="padding:20px 40px; border-radius:50px" onclick="generateAll()">Сгенерировать промт</button>
+        <button id="gen-trigger" class="btn-action" style="background: #fff; color: #000;" onclick="generateAll()">СКОПИРОВАТЬ ПРОМТ</button>
     </div>
 
-    <!-- РЕДАКТОР -->
     <div id="editor-view">
         <div class="editor-container">
-            <div class="editor-controls">
-                <button class="btn-action" onclick="runCode()">Запустить код</button>
-                <button class="btn-action btn-red" onclick="clearEditor()">Очистить</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-action" onclick="runCode()">Запустить выполнение</button>
+                <button class="btn-action" onclick="clearEditor()" style="color: var(--red);">Очистить консоль</button>
             </div>
-            <textarea id="html-code" placeholder="Пишите HTML/CSS/JS код здесь..."></textarea>
+            <textarea id="html-code" placeholder="Введите ваш HTML код здесь..."></textarea>
         </div>
         <iframe id="preview"></iframe>
     </div>
 </div>
 
 <script>
-    let users = JSON.parse(localStorage.getItem('brutal_data_v3')) || [];
+    let users = JSON.parse(localStorage.getItem('grey_db')) || [];
     let cur = null;
 
-    // ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ
     function switchMode(mode) {
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         if(mode === 'protocol') {
@@ -229,16 +246,17 @@
         }
     }
 
-    // ЛОГИКА ПРОТОКОЛА
-    function save() { localStorage.setItem('brutal_data_v3', JSON.stringify(users)); renderSidebar(); }
-    function createUser() { users.push({ name: "Новый Профиль", std: ["", "", ""], urg: [] }); save(); select(users.length - 1); }
+    function save() { localStorage.setItem('grey_db', JSON.stringify(users)); renderSidebar(); }
+    function createUser() { users.push({ name: "Иван", std: ["", "", ""], urg: [] }); save(); select(users.length - 1); }
+    
     function renderSidebar() {
         document.getElementById('user-list').innerHTML = users.map((u, i) => `
             <div class="user-tab ${i === cur ? 'active' : ''}" onclick="select(${i})">
                 <span>${u.name}</span>
-                <span onclick="delUser(event, ${i})">×</span>
+                <button class="btn-del" onclick="delUser(event, ${i})">×</button>
             </div>`).join('');
     }
+
     function select(i) {
         cur = i;
         document.getElementById('empty-hint').style.display = 'none';
@@ -246,14 +264,22 @@
         document.getElementById('inp-name').value = users[i].name;
         renderTasks(); renderSidebar();
     }
+
     function renderTasks() {
         const u = users[cur];
         document.getElementById('list-std').innerHTML = u.std.map((t, i) => `
-            <div class="task-row"><input type="text" value="${t}" oninput="updTask('std', ${i}, this.value)"><button class="btn-del" onclick="remTask('std', ${i})">×</button></div>`).join('');
+            <div style="display:flex; gap:10px; margin-bottom:10px; animation: fadeIn 0.3s ease;">
+                <input type="text" value="${t}" placeholder="Описание..." oninput="updTask('std', ${i}, this.value)">
+                <button class="btn-del" onclick="remTask('std', ${i})">×</button>
+            </div>`).join('');
         document.getElementById('list-urg').innerHTML = u.urg.map((t, i) => `
-            <div class="task-row"><input type="text" value="${t}" oninput="updTask('urg', ${i}, this.value)" style="border-color:#411"><button class="btn-del" onclick="remTask('urg', ${i})">×</button></div>`).join('');
+            <div style="display:flex; gap:10px; margin-bottom:10px; animation: fadeIn 0.3s ease;">
+                <input type="text" value="${t}" placeholder="Срочная задача..." oninput="updTask('urg', ${i}, this.value)" style="border-color: rgba(229,115,115,0.2)">
+                <button class="btn-del" onclick="remTask('urg', ${i})">×</button>
+            </div>`).join('');
     }
-    function updTask(type, i, val) { users[cur][type][i] = val; localStorage.setItem('brutal_data_v3', JSON.stringify(users)); }
+
+    function updTask(type, i, v) { users[cur][type][i] = v; localStorage.setItem('grey_db', JSON.stringify(users)); }
     function sync() { users[cur].name = document.getElementById('inp-name').value; save(); }
     function addTask(type) { users[cur][type].push(""); renderTasks(); }
     function remTask(type, i) { users[cur][type].splice(i, 1); renderTasks(); save(); }
@@ -265,37 +291,31 @@
             const std = u.std.filter(t => t.trim());
             const urg = u.urg.filter(t => t.trim());
             p += `Добавь новое задание пользователю "${u.name}". Задания ему дай следующие:\n`;
-            std.forEach((t, i) => p += `${i+1}. ${t}\n`);
+            std.forEach((t, idx) => p += `${idx+1}. ${t}\n`);
             if(urg.length > 0) {
                 p += `\nСрочные задания:\n`;
-                urg.forEach((t, i) => p += `${i+1}. ${t}\n`);
+                urg.forEach((t, idx) => p += `${idx+1}. ${t}\n`);
             }
-            p += `\n---\n`;
+            p += `\n---\n\n`;
         });
         const out = document.getElementById('final-output');
         out.innerText = p; out.style.display = 'block';
         navigator.clipboard.writeText(p);
-        alert("Промт скопирован в буфер!");
+        alert("ОТЧЕТ СФОРМИРОВАН И СКОПИРОВАН");
     }
 
-    // ЛОГИКА РЕДАКТОРА
     function runCode() {
         const code = document.getElementById('html-code').value;
         const preview = document.getElementById('preview').contentWindow.document;
-        preview.open();
-        preview.write(code);
-        preview.close();
+        preview.open(); preview.write(code); preview.close();
     }
 
     function clearEditor() {
-        if(confirm("Очистить все поле редактора?")) {
-            document.getElementById('html-code').value = "";
-            document.getElementById('preview').src = "about:blank";
-        }
+        document.getElementById('html-code').value = "";
+        document.getElementById('preview').src = "about:blank";
     }
 
     renderSidebar();
 </script>
-
 </body>
 </html>
