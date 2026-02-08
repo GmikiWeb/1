@@ -14,25 +14,24 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <!-- Favicon иконка -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔴</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔘</text></svg>">
     <style>
         :root {
             --bg: #1a1c1e;
             --surface: #24272b;
             --panel: #1e2124;
-            --accent: #e57373; /* Красный акцент вместо серого */
+            --accent: #8e99a2; /* Серый акцент вместо красного */
             --text: #e1e1e1;
             --text-dim: #9ba1a6;
-            --red: #e57373;
-            --green: #81c784;
-            --blue: #64b5f6;
-            --purple: #ba68c8;
-            --orange: #ffb74d;
+            --border: rgba(255,255,255,0.1);
             --radius: 14px;
             --transition: all 0.25s ease;
         }
 
-        * { box-sizing: border-box; }
+        * { 
+            box-sizing: border-box;
+            user-select: none; /* Отключаем выделение по умолчанию */
+        }
         
         body {
             font-family: 'Ubuntu', sans-serif;
@@ -45,6 +44,20 @@
             overflow: hidden;
         }
 
+        /* Разрешаем выделение только в определенных местах */
+        textarea, 
+        input[type="text"],
+        .data-table input,
+        #html-code,
+        #final-output,
+        .output-box,
+        .dataset-name,
+        .point-value,
+        .table-title-input,
+        th[contenteditable="true"] {
+            user-select: text !important;
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* NAV */
@@ -55,7 +68,7 @@
             align-items: center;
             padding: 0 40px;
             gap: 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--border);
             z-index: 100;
             flex-shrink: 0;
         }
@@ -69,14 +82,13 @@
 
         .logo-icon {
             font-size: 1.5rem;
-            color: var(--red);
-            filter: drop-shadow(0 0 5px rgba(229, 115, 115, 0.3));
+            color: var(--accent);
         }
 
         .logo-text {
             font-weight: 800;
             font-size: 1.2rem;
-            background: linear-gradient(90deg, var(--red), #ff9a9a);
+            background: linear-gradient(90deg, var(--accent), #b5bec8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: 1px;
@@ -119,7 +131,7 @@
             width: 320px;
             background: rgba(30, 33, 36, 0.4);
             backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255,255,255,0.05);
+            border-right: 1px solid var(--border);
             padding: 30px;
             display: flex;
             flex-direction: column;
@@ -129,7 +141,7 @@
         .btn-action {
             background: var(--surface);
             color: var(--text);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
             padding: 14px 20px;
             border-radius: var(--radius);
             font-weight: 700;
@@ -142,7 +154,7 @@
         .user-tab {
             padding: 16px;
             background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
             border-radius: var(--radius);
             margin-top: 12px;
             cursor: pointer;
@@ -184,7 +196,7 @@
         input[type="text"] {
             width: 100%;
             background: #1a1c1e;
-            border: 2px solid rgba(255,255,255,0.05);
+            border: 2px solid var(--border);
             color: #fff;
             padding: 16px;
             border-radius: 12px;
@@ -218,7 +230,7 @@
         textarea {
             flex-grow: 1;
             background: #141618;
-            border: 2px solid rgba(255,255,255,0.05);
+            border: 2px solid var(--border);
             border-radius: var(--radius);
             padding: 25px;
             color: #b5cea8;
@@ -244,87 +256,53 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: var(--bg);
+            background: #000000;
             z-index: 9999;
-            flex-direction: column;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.2s ease;
         }
 
-        .fullscreen-header {
-            height: 64px;
-            background: var(--panel);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            flex-shrink: 0;
-        }
-
-        .fullscreen-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--text);
-        }
-
-        .fullscreen-title .logo-icon {
-            font-size: 1.2rem;
-        }
-
-        .fullscreen-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .fullscreen-hint {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            margin-right: 20px;
-        }
-
-        .fullscreen-content {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        .fullscreen-preview {
-            flex: 1;
-            border-radius: var(--radius);
-            border: none;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .close-fullscreen-btn {
+        .fullscreen-close-btn {
             position: absolute;
             top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background: var(--red);
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 18px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10000;
             transition: var(--transition);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+            font-weight: bold;
         }
 
-        .close-fullscreen-btn:hover {
+        .fullscreen-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
             transform: scale(1.1);
-            background: #ff4444;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .fullscreen-hint {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.85rem;
+            font-family: 'Ubuntu', sans-serif;
+            z-index: 10000;
+        }
+
+        .fullscreen-preview {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
         }
 
         /* GRAPH VIEW */
@@ -360,7 +338,7 @@
         .graph-type-btn {
             padding: 8px 16px;
             background: var(--bg);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--text-dim);
             cursor: pointer;
@@ -397,13 +375,6 @@
             min-height: 300px;
         }
 
-        .chart-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
         .dataset-selector {
             display: flex;
             gap: 10px;
@@ -416,7 +387,7 @@
         .dataset-tab {
             padding: 8px 16px;
             background: var(--bg);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--text-dim);
             cursor: pointer;
@@ -457,7 +428,7 @@
             background: var(--bg);
             padding: 20px;
             border-radius: var(--radius);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
             margin-top: 10px;
             flex-shrink: 0;
         }
@@ -480,7 +451,7 @@
 
         .point-value {
             background: var(--surface);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
             color: var(--text);
             padding: 8px;
             border-radius: 6px;
@@ -506,17 +477,17 @@
             font-size: 1.4rem; 
             line-height: 1; 
         }
-        .btn-del:hover { color: var(--red); }
+        .btn-del:hover { color: var(--accent); }
 
         #gen-trigger {
             position: fixed;
             bottom: 40px;
             right: 40px;
-            background: var(--red);
-            color: white;
+            background: var(--accent);
+            color: var(--bg);
             border-radius: 40px;
             padding: 20px 40px;
-            box-shadow: 0 15px 30px rgba(229, 115, 115, 0.3);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
             font-size: 1rem;
             z-index: 1000;
             border: none;
@@ -535,7 +506,7 @@
             animation: fadeIn 0.3s ease;
         }
 
-        /* TABLE VIEW */
+        /* TABLE VIEW - УЛУЧШЕННАЯ ВЕРСИЯ */
         #table-view {
             display: none;
             width: 100%;
@@ -582,34 +553,60 @@
             min-height: 300px;
         }
 
+        /* Красивая таблица для редактирования */
         .data-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             background: var(--bg);
-            border-radius: var(--radius);
+            border-radius: 10px;
             overflow: hidden;
+            font-family: 'Ubuntu', sans-serif;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
         .data-table th {
-            background: var(--panel);
+            background: linear-gradient(135deg, var(--panel), #2a2d31);
             color: var(--text);
-            padding: 15px;
+            padding: 18px 20px;
             text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(255,255,255,0.1);
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-bottom: 2px solid var(--accent);
             position: sticky;
             top: 0;
             z-index: 10;
+            min-width: 120px;
+            border-right: 1px solid var(--border);
+        }
+
+        .data-table th:last-child {
+            border-right: none;
         }
 
         .data-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
             color: var(--text);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            border-right: 1px solid var(--border);
+        }
+
+        .data-table td:last-child {
+            border-right: none;
         }
 
         .data-table tr:hover {
-            background: rgba(255,255,255,0.03);
+            background: rgba(142, 153, 162, 0.05);
+        }
+
+        .data-table tr:nth-child(even) {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .data-table tr:nth-child(even):hover {
+            background: rgba(142, 153, 162, 0.08);
         }
 
         .data-table input {
@@ -617,14 +614,67 @@
             background: transparent;
             border: none;
             color: var(--text);
-            padding: 8px;
+            padding: 8px 12px;
             outline: none;
             font-family: 'Ubuntu', sans-serif;
+            font-size: 0.95rem;
+            border-radius: 4px;
+            transition: var(--transition);
         }
 
         .data-table input:focus {
-            background: rgba(255,255,255,0.05);
-            border-radius: 4px;
+            background: rgba(142, 153, 162, 0.1);
+            box-shadow: 0 0 0 2px rgba(142, 153, 162, 0.3);
+        }
+
+        .data-table .row-number {
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+            background: rgba(142, 153, 162, 0.1);
+            border-right: 1px solid var(--border);
+            min-width: 60px;
+        }
+
+        /* Таблица для экспорта (скрыта) */
+        #export-table {
+            position: fixed;
+            top: -10000px;
+            left: -10000px;
+            width: auto;
+            background: white;
+            color: #333;
+            border-collapse: collapse;
+            font-family: 'Ubuntu', sans-serif;
+            border: 1px solid #ddd;
+        }
+
+        #export-table th {
+            background: #f5f5f5;
+            color: #333;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 14px;
+            border-bottom: 2px solid var(--accent);
+            border-right: 1px solid #ddd;
+        }
+
+        #export-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #ddd;
+            color: #333;
+            font-size: 14px;
+            border-right: 1px solid #ddd;
+        }
+
+        #export-table th:last-child,
+        #export-table td:last-child {
+            border-right: none;
+        }
+
+        #export-table tr:nth-child(even) {
+            background: #f9f9f9;
         }
 
         .table-controls {
@@ -637,37 +687,22 @@
         .table-btn {
             padding: 10px 20px;
             background: var(--bg);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--text);
             cursor: pointer;
             transition: var(--transition);
             font-size: 0.9rem;
             white-space: nowrap;
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 500;
         }
 
         .table-btn:hover {
             background: var(--accent);
             color: var(--bg);
             border-color: var(--accent);
-        }
-
-        .table-btn.red {
-            background: var(--red);
-            color: white;
-            border-color: var(--red);
-        }
-
-        .table-btn.green {
-            background: var(--green);
-            color: white;
-            border-color: var(--green);
-        }
-
-        .table-btn.blue {
-            background: var(--blue);
-            color: white;
-            border-color: var(--blue);
+            transform: translateY(-2px);
         }
 
         .cell-actions {
@@ -678,7 +713,7 @@
         .cell-btn {
             padding: 4px 8px;
             background: rgba(255,255,255,0.05);
-            border: none;
+            border: 1px solid var(--border);
             border-radius: 4px;
             color: var(--text-dim);
             cursor: pointer;
@@ -689,6 +724,7 @@
         .cell-btn:hover {
             background: var(--accent);
             color: var(--bg);
+            border-color: var(--accent);
         }
 
         .export-options {
@@ -706,13 +742,14 @@
         .table-title-input {
             width: 100%;
             background: var(--bg);
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 2px solid var(--border);
             color: var(--text);
             padding: 10px 15px;
             border-radius: 8px;
             font-size: 1.2rem;
             font-weight: bold;
             outline: none;
+            font-family: 'Ubuntu', sans-serif;
         }
 
         .table-title-input:focus {
@@ -730,7 +767,7 @@
         #empty-hint h1 {
             font-size: 3rem;
             font-weight: 700;
-            background: linear-gradient(90deg, var(--red), #ff9a9a);
+            background: linear-gradient(90deg, var(--accent), #b5bec8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
@@ -740,6 +777,7 @@
             font-size: 4rem;
             margin-bottom: 20px;
             display: block;
+            color: var(--accent);
         }
 
         #empty-hint .subtitle {
@@ -754,7 +792,7 @@
 
 <nav>
     <div class="nav-logo">
-        <span class="logo-icon">🔴</span>
+        <span class="logo-icon">🔘</span>
         <span class="logo-text">GMIKIRED</span>
     </div>
     <div class="nav-item active" id="nav-prot" onclick="switchMode('protocol')">1. Протокол</div>
@@ -766,7 +804,7 @@
 <div id="main-wrapper">
     <div id="protocol-view" style="display: flex; width: 100%;">
         <div id="sidebar">
-            <button class="btn-action" onclick="createUser()" style="width: 100%; border-style: dashed; border-width: 2px; border-color: var(--red);">+ Добавить субъект</button>
+            <button class="btn-action" onclick="createUser()" style="width: 100%; border-style: dashed; border-width: 2px; border-color: var(--accent);">+ Добавить субъект</button>
             <div id="user-list" style="margin-top: 20px;"></div>
         </div>
         <div id="protocol-content">
@@ -782,14 +820,14 @@
 
                 <div style="height: 35px;"></div>
                 
-                <label style="color: var(--red);">Критические директивы</label>
+                <label style="color: var(--accent);">Критические директивы</label>
                 <div id="list-urg"></div>
-                <button class="btn-action" onclick="addTask('urg')" style="padding: 8px 20px; font-size: 0.8rem; border-color: rgba(229,115,115,0.3);">+ Добавить срочно</button>
+                <button class="btn-action" onclick="addTask('urg')" style="padding: 8px 20px; font-size: 0.8rem; border-color: rgba(142, 153, 162, 0.3);">+ Добавить срочно</button>
                 
                 <div id="final-output" class="output-box"></div>
             </div>
             <div id="empty-hint" style="text-align:center; margin-top:20%; opacity:0.1; transition: 0.5s;">
-                <span class="logo-icon">🔴</span>
+                <span class="logo-icon">🔘</span>
                 <h1>GMIKIRED</h1>
                 <div class="subtitle">SYSTEM CORE</div>
             </div>
@@ -800,8 +838,8 @@
     <div id="editor-view">
         <div class="editor-container">
             <div style="display: flex; gap: 12px;">
-                <button class="btn-action" onclick="runCode()" style="background: var(--red); color: white; border-color: var(--red);">▶ Запустить (F11)</button>
-                <button class="btn-action" onclick="clearEditor()" style="color: var(--red);">Очистить</button>
+                <button class="btn-action" onclick="runCode()" style="background: var(--accent); color: var(--bg); border-color: var(--accent);">▶ Запустить (F11)</button>
+                <button class="btn-action" onclick="clearEditor()" style="color: var(--accent);">Очистить</button>
             </div>
             <textarea id="html-code" placeholder="<html>
 <style> body { background: #eee; } </style>
@@ -813,21 +851,13 @@
 
     <!-- FULLSCREEN OVERLAY -->
     <div id="fullscreen-overlay">
-        <div class="fullscreen-header">
-            <div class="fullscreen-title">
-                <span class="logo-icon">🔴</span>
-                <span>GmikiRed Editor - Полноэкранный режим</span>
-            </div>
-            <div class="fullscreen-controls">
-                <span class="fullscreen-hint">Нажмите ESC для выхода</span>
-                <button class="btn-action" onclick="exitFullscreen()" style="background: var(--red); color: white; border-color: var(--red);">Выйти (ESC)</button>
-            </div>
-        </div>
-        <div class="fullscreen-content">
-            <iframe id="fullscreen-preview" class="fullscreen-preview"></iframe>
-        </div>
-        <button class="close-fullscreen-btn" onclick="exitFullscreen()">×</button>
+        <button class="fullscreen-close-btn" onclick="exitFullscreen()">×</button>
+        <span class="fullscreen-hint">ESC для выхода</span>
+        <iframe id="fullscreen-preview" class="fullscreen-preview"></iframe>
     </div>
+
+    <!-- СКРЫТАЯ ТАБЛИЦА ДЛЯ ЭКСПОРТА -->
+    <table id="export-table" style="display: none;"></table>
 
     <div id="graph-view">
         <div class="graph-header">
@@ -840,8 +870,8 @@
             
             <div class="chart-actions">
                 <button class="btn-action" onclick="addDataset()">+ Набор</button>
-                <button class="btn-action" onclick="downloadChart()" style="background: var(--green); color: white;">↓ PNG</button>
-                <button class="btn-action" onclick="resetChart()" style="background: var(--red); color: white;">Сброс</button>
+                <button class="btn-action" onclick="downloadChart()" style="background: #81c784; color: var(--bg);">↓ PNG</button>
+                <button class="btn-action" onclick="resetChart()" style="background: #8e99a2; color: var(--bg);">Сброс</button>
             </div>
         </div>
 
@@ -867,11 +897,11 @@
             </div>
             
             <div class="export-options">
-                <button class="table-btn green" onclick="addRow()">+ Строка</button>
-                <button class="table-btn blue" onclick="addColumn()">+ Столбец</button>
+                <button class="table-btn" onclick="addRow()">+ Строка</button>
+                <button class="table-btn" onclick="addColumn()">+ Столбец</button>
                 <button class="table-btn" onclick="exportTablePNG()">📷 PNG</button>
                 <button class="table-btn" onclick="exportTablePDF()">📄 PDF</button>
-                <button class="table-btn red" onclick="clearTable()">Очистить</button>
+                <button class="table-btn" onclick="clearTable()">Очистить</button>
             </div>
         </div>
 
@@ -880,7 +910,7 @@
                 <table class="data-table" id="data-table">
                     <thead>
                         <tr id="table-header">
-                            <th style="min-width: 50px;">#</th>
+                            <th class="row-number">#</th>
                             <th contenteditable="true" onblur="updateColumnName(0, this.textContent)">Колонка 1</th>
                             <th contenteditable="true" onblur="updateColumnName(1, this.textContent)">Колонка 2</th>
                             <th contenteditable="true" onblur="updateColumnName(2, this.textContent)">Колонка 3</th>
@@ -888,13 +918,13 @@
                     </thead>
                     <tbody id="table-body">
                         <tr>
-                            <td style="font-weight: bold; background: rgba(255,255,255,0.02);">1</td>
+                            <td class="row-number">1</td>
                             <td><input type="text" value="Данные 1" oninput="updateCell(0,0,this.value)"></td>
                             <td><input type="text" value="Данные 2" oninput="updateCell(0,1,this.value)"></td>
                             <td><input type="text" value="Данные 3" oninput="updateCell(0,2,this.value)"></td>
                         </tr>
                         <tr>
-                            <td style="font-weight: bold; background: rgba(255,255,255,0.02);">2</td>
+                            <td class="row-number">2</td>
                             <td><input type="text" value="Данные 4" oninput="updateCell(1,0,this.value)"></td>
                             <td><input type="text" value="Данные 5" oninput="updateCell(1,1,this.value)"></td>
                             <td><input type="text" value="Данные 6" oninput="updateCell(1,2,this.value)"></td>
@@ -934,7 +964,7 @@
             {
                 id: 1,
                 name: 'Данные 1',
-                color: '#e57373', // Красный цвет для GmikiRed
+                color: '#8e99a2',
                 values: [10.5, 22.3, 35.7, 42.1, 38.4, 25.9, 12.7],
                 visible: true
             }
@@ -1025,7 +1055,7 @@
             </div>`).join('');
         document.getElementById('list-urg').innerHTML = u.urg.map((t, i) => `
             <div style="display:flex; gap:10px; margin-bottom:12px;">
-                <input type="text" value="${t}" placeholder="Срочное распоряжение..." oninput="updTask('urg', ${i}, this.value)" style="border-color: rgba(229,115,115,0.3)">
+                <input type="text" value="${t}" placeholder="Срочное распоряжение..." oninput="updTask('urg', ${i}, this.value)" style="border-color: rgba(142, 153, 162, 0.3)">
                 <button class="btn-del" onclick="remTask('urg', ${i})">×</button>
             </div>`).join('');
     }
@@ -1075,7 +1105,7 @@
         fullscreenPreview.close();
         
         // Показываем оверлей
-        overlay.style.display = 'flex';
+        overlay.style.display = 'block';
         
         // Блокируем скролл на основной странице
         document.body.style.overflow = 'hidden';
@@ -1209,7 +1239,7 @@
             r: parseInt(result[1], 16),
             g: parseInt(result[2], 16),
             b: parseInt(result[3], 16)
-        } : { r: 229, g: 115, b: 115 };
+        } : { r: 142, g: 153, b: 162 };
     }
 
     function setChartType(type) {
@@ -1248,7 +1278,7 @@
                         <input type="text" 
                                value="${dataset.name}" 
                                oninput="updateDatasetName(${currentDatasetIndex}, this.value)"
-                               style="background: var(--surface); border: 1px solid rgba(255,255,255,0.1); color: var(--text); padding: 8px 12px; border-radius: 6px; width: 200px;">
+                               style="background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; width: 200px;">
                         
                         <input type="color" 
                                value="${dataset.color}" 
@@ -1330,7 +1360,7 @@
     }
 
     function addDataset() {
-        const colors = ['#e57373', '#81c784', '#64b5f6', '#ba68c8', '#ffb74d', '#4db6ac'];
+        const colors = ['#8e99a2', '#81c784', '#64b5f6', '#ba68c8', '#ffb74d', '#4db6ac'];
         const colorIndex = chartData.datasets.length % colors.length;
         
         const newDataset = {
@@ -1381,7 +1411,7 @@
                     {
                         id: 1,
                         name: 'Данные 1',
-                        color: '#e57373',
+                        color: '#8e99a2',
                         values: [10.5, 22.3, 35.7, 42.1, 38.4, 25.9, 12.7],
                         visible: true
                     }
@@ -1412,7 +1442,7 @@
         const tbody = document.getElementById('table-body');
         
         // Обновляем заголовки
-        headerRow.innerHTML = '<th style="min-width: 50px;">#</th>';
+        headerRow.innerHTML = '<th class="row-number">#</th>';
         tableData.columns.forEach((col, index) => {
             headerRow.innerHTML += `
                 <th contenteditable="true" 
@@ -1431,7 +1461,7 @@
         tbody.innerHTML = '';
         tableData.rows.forEach((row, rowIndex) => {
             let rowHtml = `<tr>
-                <td style="font-weight: bold; background: rgba(255,255,255,0.02);">
+                <td class="row-number">
                     ${rowIndex + 1}
                     <button class="cell-btn" onclick="removeRow(${rowIndex})" style="margin-left: 5px;">×</button>
                 </td>`;
@@ -1539,16 +1569,45 @@
     }
 
     function exportTablePNG() {
-        const tableElement = document.getElementById('data-table');
+        // Создаем красивую таблицу для экспорта
+        const exportTable = document.getElementById('export-table');
+        exportTable.innerHTML = '';
         
-        html2canvas(tableElement, {
-            backgroundColor: '#24272b',
+        // Создаем заголовок
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        
+        // Добавляем заголовки
+        headerRow.innerHTML = `<th>#</th>`;
+        tableData.columns.forEach(col => {
+            headerRow.innerHTML += `<th>${col}</th>`;
+        });
+        thead.appendChild(headerRow);
+        exportTable.appendChild(thead);
+        
+        // Создаем тело таблицы
+        const tbody = document.createElement('tbody');
+        tableData.rows.forEach((row, rowIndex) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td style="font-weight: bold; background: #f5f5f5; text-align: center;">${rowIndex + 1}</td>`;
+            
+            row.forEach(cell => {
+                tr.innerHTML += `<td>${cell}</td>`;
+            });
+            
+            tbody.appendChild(tr);
+        });
+        exportTable.appendChild(tbody);
+        
+        // Экспортируем как PNG
+        html2canvas(exportTable, {
+            backgroundColor: '#ffffff',
             scale: 2,
             logging: false,
             useCORS: true
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `${tableData.title}-gmikired-${new Date().toISOString().slice(0,10)}.png`;
+            link.download = `${tableData.title}-${new Date().toISOString().slice(0,10)}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
@@ -1562,37 +1621,62 @@
         });
         
         // Заголовок
-        doc.setFontSize(16);
-        doc.setTextColor(229, 115, 115);
-        doc.text("GmikiRed - " + tableData.title, 14, 15);
-        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(18);
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'bold');
+        doc.text(tableData.title, 14, 20);
+        
+        // Подзаголовок
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Создано в GmikiRed System • ${new Date().toLocaleDateString()}`, 14, 27);
         
         // Подготовка данных для таблицы
-        const tableBody = [];
-        tableData.rows.forEach(row => {
-            tableBody.push(row);
+        const tableBody = tableData.rows.map((row, index) => {
+            return [(index + 1).toString(), ...row];
         });
+        
+        const tableHeaders = ['#', ...tableData.columns];
         
         // Создание таблицы
         doc.autoTable({
-            head: [tableData.columns],
+            head: [tableHeaders],
             body: tableBody,
-            startY: 25,
-            theme: 'striped',
+            startY: 35,
+            theme: 'grid',
             headStyles: {
-                fillColor: [36, 39, 43],
-                textColor: [225, 225, 225],
-                fontStyle: 'bold'
+                fillColor: [80, 80, 80],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 10
             },
             bodyStyles: {
-                fillColor: [26, 28, 30],
-                textColor: [225, 225, 225]
+                textColor: [50, 50, 50],
+                fontSize: 9
             },
             alternateRowStyles: {
-                fillColor: [30, 33, 36]
+                fillColor: [245, 245, 245]
             },
-            margin: { top: 25 }
+            margin: { top: 35 },
+            styles: {
+                cellPadding: 5,
+                fontSize: 9,
+                valign: 'middle'
+            },
+            columnStyles: {
+                0: { cellWidth: 10, halign: 'center' }
+            }
         });
+        
+        // Футер
+        const pageCount = doc.internal.getNumberOfPages();
+        for(let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Страница ${i} из ${pageCount} • GmikiRed System`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+        }
         
         doc.save(`gmikired-${tableData.title}.pdf`);
     }
